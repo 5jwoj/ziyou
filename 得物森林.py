@@ -2,15 +2,26 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/7/6 12:24
 # @Author  : ziyou
+# -------------------------------
+# cron "1 8,12,18,22 * * *" script-path=xxx.py,tag=匹配cron用
+# const $ = new Env('得物森林')
+# 抓包获取 x_auth_token
+# 青龙变量export dewu_x_auth_token='Bearer eyJhbGciOi*******',多账号使用换行或&
+
 import json
+import os
 import sys
 import time
 import requests
 from urllib.parse import urlparse, parse_qs
 
-# 抓包获取 x_auth_token
-X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
-                'Bearer eyJhbGciOi*******', ]
+
+# X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
+#                 'Bearer eyJhbGciOi*******', ]
+X_AUTH_TOKEN=[]
+dewu_x_auth_token = os.getenv("dewu_x_auth_token")
+if dewu_x_auth_token:
+    X_AUTH_TOKEN = dewu_x_auth_token.replace("&", "\n").split("\n")
 
 
 # 获得地址中 params 中 键为key的值
@@ -458,6 +469,9 @@ class DeWu:
 
 # 主程序
 def main():
+    if not X_AUTH_TOKEN:
+        print('没有获取到账号！')
+        return
     print(f'获取到{len(X_AUTH_TOKEN)}个账号！')
     for index, token in enumerate(X_AUTH_TOKEN):
         print(f'*****第{index + 1}个账号*****')
