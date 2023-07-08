@@ -6,19 +6,20 @@
 # cron "1 8,12,18,22 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('得物森林')
 # 抓包获取 x_auth_token
-# 青龙变量export dewu_x_auth_token='Bearer eyJhbGciOi*******',多账号使用换行或&
+# 得物森林
+# export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 
 import json
 import os
+import re
 import sys
 import time
 import requests
 from urllib.parse import urlparse, parse_qs
 
-
 # X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
 #                 'Bearer eyJhbGciOi*******', ]
-X_AUTH_TOKEN=[]
+X_AUTH_TOKEN = []
 dewu_x_auth_token = os.getenv("dewu_x_auth_token")
 if dewu_x_auth_token:
     X_AUTH_TOKEN = dewu_x_auth_token.replace("&", "\n").split("\n")
@@ -77,6 +78,7 @@ class DeWu:
 
     # 领取气泡水滴
     def receive_droplet_extra(self):
+        temporary_number = 0
         while True:
             url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/info'
             response = self.session.get(url, headers=self.headers)
@@ -90,6 +92,13 @@ class DeWu:
                     water_droplet_number = response_dict.get('data').get('dailyExtra').get('totalDroplet')
                 else:  # 第二次领取时
                     water_droplet_number = response_dict.get('data').get('onlineExtra').get('totalDroplet')
+                # 如果二者不相等，说明浇水成功 但奖励有变化 继续浇水
+                if temporary_number != water_droplet_number:  # 如果二者相等，说明浇水成功 但奖励没变化 不再浇水 直接领取
+                    temporary_number = water_droplet_number
+                    if water_droplet_number < 60:
+                        print(f'当前气泡水滴未满，开始浇水！')
+                        if self.waterting():  # 成功浇水 继续 否则 直接领取
+                            continue  # 浇水成功后查询信息
                 print(f"当前可领取气泡水滴{water_droplet_number}g")
                 url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/receive'
                 response = self.session.post(url, headers=self.headers)
@@ -317,6 +326,9 @@ class DeWu:
             task_id = tasks_dict.get('taskId')
             task_type = tasks_dict.get('taskType')
             task_name = tasks_dict.get('taskName')
+            btd = get_url_key_value(tasks_dict.get('jumpUrl'), 'btd')
+            btd = int(btd) if btd else btd  # 如果bid存在 转换为整数类型
+
             if tasks_dict['isComplete'] is True:  # 可以直接领取奖励的
                 if tasks_dict.get('trackTime'):  # 如果该值存在，说明是领40g水滴值任务，但是已经领过了
                     continue
@@ -350,8 +362,19 @@ class DeWu:
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
-            if task_name in ['逛逛国潮夏季专场', '浏览美妆会场15s', '浏览IVEIII品牌页15s', ]:
-                btd = get_url_key_value(tasks_dict.get('jumpUrl'), 'btd')
+            if any(re.match(pattern, task_name) for pattern in ['收藏.*']):
+                _json = _json = {'taskId': task_id, 'taskType': str(task_type), 'btd': btd, 'spuId': 0}
+                self.submit_task_completion_status(_json)  # 提交完成状态
+                self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                continue
+
+            if any(re.match(pattern, task_name) for pattern in ['订阅.*']):
+                _json = _json = {'taskId': task_id, 'taskType': str(task_type), 'btd': btd}
+                self.submit_task_completion_status(_json)  # 提交完成状态
+                self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                continue
+
+            if any(re.match(pattern, task_name) for pattern in ['逛逛国潮夏季专场', '浏览.*15s']):
                 _json = {'taskId': task_id, 'taskType': task_type, 'btd': btd}
                 if self.task_commit_pre(_json):
                     print(f'等待16秒！')
@@ -359,6 +382,17 @@ class DeWu:
                     _json = {'taskId': task_id, 'taskType': str(task_type), 'activityType': None, 'activityId': None,
                              'taskSetId': None, 'venueCode': None, 'venueUnitStyle': None, 'taskScene': None,
                              'btd': btd}
+                    self.submit_task_completion_status(_json)  # 提交完成状态
+                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                    continue
+
+            if any(re.match(pattern, task_name) for pattern in ['晒图']):
+                _json = {'taskId': task_id, 'taskType': task_type}
+                if self.task_commit_pre(_json):
+                    print(f'等待16秒！')
+                    time.sleep(16)
+                    _json = {'taskId': task_id, 'taskType': str(task_type), 'activityType': None, 'activityId': None,
+                             'taskSetId': None, 'venueCode': None, 'venueUnitStyle': None, 'taskScene': None}
                     self.submit_task_completion_status(_json)  # 提交完成状态
                     self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                     continue
