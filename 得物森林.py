@@ -17,9 +17,10 @@ import time
 import requests
 from urllib.parse import urlparse, parse_qs
 
+X_AUTH_TOKEN = []
 # X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
 #                 'Bearer eyJhbGciOi*******', ]
-X_AUTH_TOKEN = []
+
 dewu_x_auth_token = os.getenv("dewu_x_auth_token")
 if dewu_x_auth_token:
     X_AUTH_TOKEN = dewu_x_auth_token.replace("&", "\n").split("\n")
@@ -318,9 +319,9 @@ class DeWu:
     def execute_task(self):
         self.get_task_list()  # 刷新任务列表
         for tasks_dict in self.tasks_dict_list:
-            if tasks_dict['isReceiveReward'] is True:  # 今天不能进行操作了，跳过
+            if tasks_dict.get('isReceiveReward') is True:  # 今天不能进行操作了，跳过
                 continue
-            if tasks_dict['rewardCount'] >= 3000:  # 获取水滴超过3000的，需要下单，跳过
+            if tasks_dict.get('rewardCount') >= 3000:  # 获取水滴超过3000的，需要下单，跳过
                 continue
             classify = tasks_dict.get('classify')
             task_id = tasks_dict.get('taskId')
@@ -329,8 +330,8 @@ class DeWu:
             btd = get_url_key_value(tasks_dict.get('jumpUrl'), 'btd')
             btd = int(btd) if btd else btd  # 如果bid存在 转换为整数类型
 
-            if tasks_dict['isComplete'] is True:  # 可以直接领取奖励的
-                if tasks_dict.get('trackTime'):  # 如果该值存在，说明是领40g水滴值任务，但是已经领过了
+            if tasks_dict.get('isComplete') is True:  # 可以直接领取奖励的
+                if task_name == '领40g水滴值' and not tasks_dict.get('receivable'):  # 如果该值不存在，说明已经领过40g水滴了
                     continue
                 print(f'开始任务：{task_name}')
                 self.receive_task_reward(classify, task_id, task_type)
