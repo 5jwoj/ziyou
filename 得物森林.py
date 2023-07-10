@@ -3,7 +3,7 @@
 # @Time    : 2023/7/6 12:24
 # @Author  : ziyou
 # -------------------------------
-# cron "1 8,12,18,22 * * *" script-path=xxx.py,tag=匹配cron用
+# cron "1 8,12,15,18,22 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('得物森林')
 # 抓包获取 x_auth_token
 # 得物森林
@@ -36,7 +36,10 @@ def get_url_key_value(url, key):
 
 
 class DeWu:
-    def __init__(self, x_auth_token):
+    WATERTING_G: int = 40  # 每次浇水克数
+
+    def __init__(self, x_auth_token, waterting_g=WATERTING_G):
+        self.waterting_g = waterting_g
         self.session = requests.Session()
         self.headers = {'x-auth-token': x_auth_token}
         self.tasks_completed_number = 0  # 任务完成数
@@ -73,13 +76,14 @@ class DeWu:
         # print(response_dict)
         if response_dict.get('code') == 200:
             # 暂时设置，看看礼盒是什么先
-            print(f"签到成功,获得{response_dict.get('data').get('Num')}g水滴！ {response_dict}")
+            print(f"签到成功,获得{response_dict.get('data').get('Num')}g水滴！")
             return
         print(f"签到失败！ {response_dict.get('msg')}")
 
     # 领取气泡水滴
     def receive_droplet_extra(self):
         temporary_number = 0
+        countdown_time = 0
         while True:
             url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/info'
             response = self.session.get(url, headers=self.headers)
@@ -99,6 +103,7 @@ class DeWu:
                     if water_droplet_number < 60:
                         print(f'当前气泡水滴未满，开始浇水！')
                         if self.waterting():  # 成功浇水 继续 否则 直接领取
+                            time.sleep(1)
                             continue  # 浇水成功后查询信息
                 print(f"当前可领取气泡水滴{water_droplet_number}g")
                 url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/receive'
@@ -106,17 +111,20 @@ class DeWu:
                 response_dict = response.json()
                 # print(response_dict)
                 if response_dict.get('code') != 200:
-                    print(f"领取气泡水滴失败! {response_dict}")
-                    return
+                    countdown_time += 60
+                    if countdown_time > 60:  # 已经等待过60s，任为领取成功，退出
+                        print(f"领取气泡水滴失败! {response_dict}")
+                        return
+                    print(f'等待{countdown_time}秒后领取')
+                    time.sleep(countdown_time)
+                    continue
                 print(f"领取气泡水滴成功! 获得{response_dict.get('data').get('totalDroplet')}g水滴")
-            else:
+                countdown_time = 0  # 领取成功，重置等待时间
+            else:  # 今天不可领取了，退出
                 water_droplet_number = response_dict.get('data').get('dailyExtra').get('totalDroplet')
                 print(f"{response_dict.get('data').get('dailyExtra').get('popTitle')},"
                       f"已经积攒{water_droplet_number}g水滴!")
                 return
-            countdown_time = 60
-            print(f'等待{countdown_time + 3}秒后再次领取')
-            time.sleep(countdown_time + 3)
 
     # 浇水充满气泡水滴
     def waterting_droplet_extra(self):
@@ -240,7 +248,7 @@ class DeWu:
         if response_dict.get('code') != 200:
             print(f"浇水失败! {response_dict}")
             return False
-        print(f"成功浇水40g! ")
+        print(f"成功浇水{self.waterting_g}g! ")
         if response_dict.get('data').get('nextWateringTimes') == 0:
             print('开始领取浇水奖励！')
             time.sleep(1)
@@ -263,6 +271,17 @@ class DeWu:
             for _ in range(count):
                 if not self.waterting():  # 无法浇水时退出
                     return
+                time.sleep(1)
+
+    # 浇水直到少于1000g
+    def waterting_until_less_than_1000g(self):
+        droplet_number = self.get_droplet_number()
+        if droplet_number > 1000:
+            count = int((droplet_number - 1000) / self.waterting_g)
+            for _ in range(count + 1):
+                if not self.waterting():  # 无法浇水时退出
+                    return
+                time.sleep(1)
 
     # 提交任务完成状态
     def submit_task_completion_status(self, _json):
@@ -400,7 +419,7 @@ class DeWu:
 
             if task_name == '完成五次浇灌':
                 count = tasks_dict.get('total') - tasks_dict.get('curStep')  # 还需要浇水的次数=要浇水的次数-以浇水的次数
-                if self.get_droplet_number() < (count * 40):
+                if self.get_droplet_number() < (count * self.waterting_g):
                     print(f'当前水滴不足以完成任务，跳过')
                     continue
                 for _ in range(count):
@@ -497,23 +516,25 @@ class DeWu:
         self.waterting_droplet_extra()
         print('开始进行水滴投资')
         self.droplet_invest()
+        print('开始进行浇水直到少于1000g')
+        self.waterting_until_less_than_1000g()
         print(f'剩余水滴：{self.get_droplet_number()}')
         # 获取种树进度
         self.get_tree_planting_progress()
 
 
 # 主程序
-def main():
-    if not X_AUTH_TOKEN:
+def main(ck_list):
+    if not ck_list:
         print('没有获取到账号！')
         return
-    print(f'获取到{len(X_AUTH_TOKEN)}个账号！')
-    for index, token in enumerate(X_AUTH_TOKEN):
+    print(f'获取到{len(ck_list)}个账号！')
+    for index, token in enumerate(ck_list):
         print(f'*****第{index + 1}个账号*****')
         DeWu(token).main()
         print()
 
 
 if __name__ == '__main__':
-    main()
+    main(X_AUTH_TOKEN)
     sys.exit()
