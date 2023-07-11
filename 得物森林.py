@@ -394,7 +394,7 @@ class DeWu:
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
-            if any(re.match(pattern, task_name) for pattern in ['逛逛国潮夏季专场', '浏览.*15s','逛一逛.*']):
+            if any(re.match(pattern, task_name) for pattern in ['逛逛国潮夏季专场', '浏览.*15s', '逛一逛.*']):
                 _json = {'taskId': task_id, 'taskType': task_type, 'btd': btd}
                 if self.task_commit_pre(_json):
                     print(f'等待16秒！')
@@ -441,6 +441,7 @@ class DeWu:
                         self.submit_task_completion_status(_json)  # 提交完成状态
                         self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                         continue
+            print(f'该任务暂时无法处理，请提交日志给作者！ {tasks_dict}')
 
     # 执行累计任务
     def execute_cumulative_task(self):
@@ -468,8 +469,12 @@ class DeWu:
             # print(response_dict)
             if response_dict.get('code') == 200 and response_dict.get('status') == 200:
                 print('水滴投资成功，水滴-100g')
-            else:
-                print(f'水滴投资失败：{response_dict}')
+                return
+            if response_dict.get("msg") == '水滴不够了':
+                print(f'水滴投资失败，剩余水滴需超过100g，{response_dict.get("msg")}')
+                return
+            print(f'水滴投资出错！ {response_dict}')
+            return
         else:
             print('今日已经水滴投资过了！')
 
