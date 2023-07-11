@@ -394,7 +394,7 @@ class DeWu:
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
-            if any(re.match(pattern, task_name) for pattern in ['逛逛国潮夏季专场', '浏览.*15s']):
+            if any(re.match(pattern, task_name) for pattern in ['逛逛国潮夏季专场', '浏览.*15s','逛一逛.*']):
                 _json = {'taskId': task_id, 'taskType': task_type, 'btd': btd}
                 if self.task_commit_pre(_json):
                     print(f'等待16秒！')
