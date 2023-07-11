@@ -41,7 +41,7 @@ class DeWu:
     def __init__(self, x_auth_token, waterting_g=WATERTING_G):
         self.waterting_g = waterting_g
         self.session = requests.Session()
-        self.headers = {'x-auth-token': x_auth_token}
+        self.headers = {'SK': '', 'x-auth-token': x_auth_token}
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
         self.tasks_dict_list = []  # 任务字典列表
@@ -529,10 +529,10 @@ def main(ck_list):
         print('没有获取到账号！')
         return
     print(f'获取到{len(ck_list)}个账号！')
-    for index, token in enumerate(ck_list):
+    for index, ck in enumerate(ck_list):
         print(f'*****第{index + 1}个账号*****')
-        DeWu(token).main()
-        print()
+        DeWu(ck).main()
+        print('')
 
 
 if __name__ == '__main__':
