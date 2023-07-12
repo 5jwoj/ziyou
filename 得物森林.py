@@ -39,9 +39,11 @@ def get_url_key_value(url, key):
 
 class DeWu:
     WATERTING_G: int = 40  # 每次浇水克数
+    REMAINING_G: int = 1800  # 最后浇水剩余不超过的克数
 
-    def __init__(self, x_auth_token, waterting_g=WATERTING_G):
+    def __init__(self, x_auth_token, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
         self.waterting_g = waterting_g
+        self.remaining_g = remaining_g
         self.session = requests.Session()
         self.headers = {'SK': '', 'x-auth-token': x_auth_token}
         self.tasks_completed_number = 0  # 任务完成数
@@ -275,11 +277,11 @@ class DeWu:
                     return
                 time.sleep(1)
 
-    # 浇水直到少于1000g
-    def waterting_until_less_than_1000g(self):
+    # 浇水直到少于 指定克数
+    def waterting_until_less_than(self):
         droplet_number = self.get_droplet_number()
-        if droplet_number > 1000:
-            count = int((droplet_number - 1000) / self.waterting_g)
+        if droplet_number > self.remaining_g:
+            count = int((droplet_number - self.remaining_g) / self.waterting_g)
             for _ in range(count + 1):
                 if not self.waterting():  # 无法浇水时退出
                     return
@@ -550,8 +552,8 @@ class DeWu:
         self.droplet_invest()
         print('开始进行助力')
         self.help_user()
-        print('开始进行浇水直到少于1000g')
-        self.waterting_until_less_than_1000g()
+        print(f'开始进行浇水直到少于{self.remaining_g}g')
+        self.waterting_until_less_than()
         print(f'剩余水滴：{self.get_droplet_number()}')
         # 获取种树进度
         self.get_tree_planting_progress()
