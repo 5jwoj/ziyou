@@ -514,6 +514,7 @@ class DeWu:
             response = requests.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             print(response_dict.get('data').get('inviteRes'))
+            time.sleep(1)
         return
 
     # 领取助力奖励
