@@ -42,13 +42,15 @@ class DeWu:
     REMAINING_G: int = 1800  # 最后浇水剩余不超过的克数
 
     def __init__(self, x_auth_token, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
-        self.waterting_g = waterting_g
-        self.remaining_g = remaining_g
+        self.waterting_g = waterting_g  # 每次浇水克数
+        self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
         self.headers = {'SK': '', 'x-auth-token': x_auth_token}
+        self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
         self.tasks_dict_list = []  # 任务字典列表
+        self.is_team_tree = False  # 是否是团队树
 
     # 种树奖品
     def tree_info(self):
@@ -60,6 +62,15 @@ class DeWu:
             name = response_dict.get('data').get('name')
             level = response_dict.get('data').get('level')
             return name, level
+
+    # 判断是否是团队树
+    def determine_whether_is_team_tree(self):
+        url = 'https://app.dewu.com/hacking-tree/v1/team/info'
+        response = self.session.get(url, headers=self.headers)
+        response_dict = response.json()
+        # print(response_dict)
+        if response_dict.get('data').get('show') is True and response_dict.get('data').get('teamTreeId'):
+            self.is_team_tree = True
 
     # 领潮金币签到
     def check_in(self):
@@ -160,7 +171,7 @@ class DeWu:
     # 判断木桶水滴是否可以领取
     def judging_bucket_droplet(self):
         url = 'https://app.dewu.com/hacking-tree/v1/droplet/generate_info'
-        response = requests.get(url, headers=self.headers)
+        response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('data').get('currentDroplet') == 100:
@@ -186,7 +197,7 @@ class DeWu:
     def get_droplet_number(self):
         url = 'https://app.dewu.com/hacking-tree/v1/user/init'
         _json = {'keyword': ''}
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         droplet_number = response_dict.get('data').get('droplet')
@@ -196,7 +207,7 @@ class DeWu:
     def receive_cumulative_tasks_reward(self, condition):
         url = 'https://app.dewu.com/hacking-tree/v1/task/extra'
         _json = {'condition': condition}
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') != 200:
@@ -211,7 +222,7 @@ class DeWu:
             _json = {'classify': classify, 'taskId': task_id, 'completeFlag': 1}
         else:
             _json = {'classify': classify, 'taskId': task_id}
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') != 200:
@@ -223,7 +234,7 @@ class DeWu:
     def receive_watering_reward(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_watering_reward'
         _json = {'promote': ''}
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') != 200:
@@ -235,7 +246,7 @@ class DeWu:
     def receive_level_reward(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_level_reward'
         _json = {'promote': ''}
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') != 200:
@@ -245,8 +256,27 @@ class DeWu:
 
     # 浇水
     def waterting(self):
+        if self.is_team_tree is True:  # 如果是团队树，使用团队浇水
+            return self.team_waterting()
         url = 'https://app.dewu.com/hacking-tree/v1/tree/watering'
-        response = requests.post(url, headers=self.headers)
+        response = self.session.post(url, headers=self.headers)
+        response_dict = response.json()
+        # print(response_dict)
+        if response_dict.get('code') != 200:
+            print(f"浇水失败! {response_dict}")
+            return False
+        print(f"成功浇水{self.waterting_g}g! ")
+        if response_dict.get('data').get('nextWateringTimes') == 0:
+            print('开始领取浇水奖励！')
+            time.sleep(1)
+            self.receive_watering_reward()
+        return True
+
+    # 团队浇水
+    def team_waterting(self):
+        url = 'https://app.dewu.com/hacking-tree/v1/team/tree/watering'
+        _json = {"teamTreeId": self.tree_id}
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') != 200:
@@ -290,7 +320,7 @@ class DeWu:
     # 提交任务完成状态
     def submit_task_completion_status(self, _json):
         url = 'https://app.dewu.com/hacking-task/v1/task/commit'
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') == 200:
@@ -321,7 +351,7 @@ class DeWu:
     def task_obtain(self, task_id, task_type):
         url = 'https://app.dewu.com/hacking-task/v1/task/obtain'
         _json = {'taskId': task_id, 'taskType': task_type}
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') == 200 and response_dict.get('status') == 200:
@@ -331,7 +361,7 @@ class DeWu:
     # 浏览任务开始  且等待16s TaskType有变化  浏览15s会场会变成16
     def task_commit_pre(self, _json):
         url = 'https://app.dewu.com/hacking-task/v1/task/pre_commit'
-        response = requests.post(url, headers=self.headers, json=_json)
+        response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') == 200 and response_dict.get('status') == 200:
@@ -459,7 +489,7 @@ class DeWu:
     # 水滴投资
     def droplet_invest(self):
         url = 'https://app.dewu.com/hacking-tree/v1/invest/info'
-        response = requests.get(url, headers=self.headers)
+        response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('data').get('isToday') is False:  # 可领取
@@ -468,7 +498,7 @@ class DeWu:
             print('今日已领取过水滴投资奖励了')
         if response_dict.get('data').get('triggered') is True:  # 可投资
             url = 'https://app.dewu.com/hacking-tree/v1/invest/commit'
-            response = requests.post(url, headers=self.headers)
+            response = self.session.post(url, headers=self.headers)
             response_dict = response.json()
             # print(response_dict)
             if response_dict.get('code') == 200 and response_dict.get('status') == 200:
@@ -485,7 +515,7 @@ class DeWu:
     # 领取水滴投资
     def received_droplet_invest(self):
         url = 'https://app.dewu.com/hacking-tree/v1/invest/receive'
-        response = requests.post(url, headers=self.headers)
+        response = self.session.post(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
         profit = response_dict.get('data').get('profit')
@@ -494,7 +524,7 @@ class DeWu:
     # 获取助力码
     def get_share_code(self) -> str:
         url = 'https://app.dewu.com/hacking-tree/v1/keyword/gen'
-        response = requests.post(url, headers=self.headers)
+        response = self.session.post(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('status') == 200:
@@ -511,7 +541,7 @@ class DeWu:
             print(f'开始助力 {share_code}', end=' ')
             url = 'https://app.dewu.com/hacking-tree/v1/user/init'
             _json = {'keyword': share_code}
-            response = requests.post(url, headers=self.headers, json=_json)
+            response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             print(response_dict.get('data').get('inviteRes'))
             time.sleep(1)
@@ -520,7 +550,7 @@ class DeWu:
     # 领取助力奖励
     def receive_help_reward(self):
         url = 'https://app.dewu.com/hacking-tree/v1/invite/list'
-        response = requests.get(url, headers=self.headers)
+        response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('status') == 200:
@@ -533,7 +563,7 @@ class DeWu:
                 invitee_user_id = reward.get('inviteeUserId')
                 url = 'https://app.dewu.com/hacking-tree/v1/invite/reward'
                 _json = {'inviteeUserId': invitee_user_id}
-                response = requests.post(url, headers=self.headers, json=_json)
+                response = self.session.post(url, headers=self.headers, json=_json)
                 response_dict = response.json()
                 if response_dict.get('status') == 200:
                     droplet = response_dict.get('data').get('droplet')
@@ -545,6 +575,27 @@ class DeWu:
         print(f'获取助力列表出现未知错误！ {response_dict}')
         return
 
+    # 领取合种上线奖励
+    def receive_hybrid_online_reward(self):
+        url = f'https://app.dewu.com/hacking-tree/v1/team/sign/list?teamTreeId={self.tree_id}'
+        response = self.session.get(url, headers=self.headers)
+        response_dict = response.json()
+        # print(response_dict)
+        reward_list = response_dict.get('data').get('list')
+        if reward_list:
+            for reward in reward_list:
+                # 如果任务完成但是未领取
+                if reward.get('isComplete') is True and reward.get('isReceive') is False:
+                    url = 'https://app.dewu.com/hacking-tree/v1/team/sign/receive'
+                    _json = {"teamTreeId": self.tree_id, "day": reward.get('day')}
+                    response = self.session.post(url, headers=self.headers, json=_json)
+                    response_dict = response.json()
+                    if response_dict.get('data').get('isOk') is True:
+                        print(f'获得{reward.get("num")}g水滴')
+                        continue
+                    print(f'领取合种上线奖励出现未知错误！ {response_dict}')
+            return
+
     # 获取种树进度
     def get_tree_planting_progress(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_tree_info'
@@ -554,16 +605,19 @@ class DeWu:
         if response_dict.get('code') != 200:
             print(f"获取种树进度失败! {response_dict}")
             return
+        self.tree_id = response_dict.get('data').get('treeId')
         level = response_dict.get('data').get('level')
         current_level_need_watering_droplet = response_dict.get('data').get('currentLevelNeedWateringDroplet')
         user_watering_droplet = response_dict.get('data').get('userWateringDroplet')
         print(f"种树进度: {level}级 {user_watering_droplet}/{current_level_need_watering_droplet}")
 
     def main(self):
-        character='★★'
+        character = '★★'
         name, level = self.tree_info()
         print(f'目标：{name}')
         print(f'剩余水滴：{self.get_droplet_number()}')
+        # 判断是否是团队树
+        self.determine_whether_is_team_tree()
         # 获取种树进度
         self.get_tree_planting_progress()
         print(f'{character}开始签到')
@@ -579,6 +633,8 @@ class DeWu:
         self.execute_receive_watering_reward()
         print(f'{character}开始浇水充满气泡水滴')
         self.waterting_droplet_extra()
+        print(f'{character}开始领取合种上线奖励')
+        self.receive_hybrid_online_reward()
         print(f'{character}开始进行水滴投资')
         self.droplet_invest()
         print(f'{character}开始进行助力')
@@ -590,7 +646,6 @@ class DeWu:
         print(f'剩余水滴：{self.get_droplet_number()}')
         # 获取种树进度
         self.get_tree_planting_progress()
-
 
 
 # 主程序
