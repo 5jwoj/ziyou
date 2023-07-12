@@ -181,7 +181,7 @@ class DeWu:
     # 获得当前水滴数
     def get_droplet_number(self):
         url = 'https://app.dewu.com/hacking-tree/v1/user/init'
-        data = {'keyword': '🌱😻🙉👶🌷💥'}
+        data = {'keyword': ''}
         response = requests.post(url, headers=self.headers, data=json.dumps(data))
         response_dict = response.json()
         # print(response_dict)
