@@ -360,7 +360,7 @@ class DeWu:
                 self.receive_task_reward(classify, task_id, task_type)
                 continue
 
-            print(f'开始任务：{task_name}')
+            print(f'★开始任务：{task_name}')
             if task_name == '完成一次签到':  # 签到
                 self.check_in()
                 data = {'taskId': tasks_dict['taskId'], 'taskType': str(tasks_dict['taskType'])}
@@ -516,6 +516,34 @@ class DeWu:
             print(response_dict.get('data').get('inviteRes'))
         return
 
+    # 领取助力奖励
+    def receive_help_reward(self):
+        url = 'https://app.dewu.com/hacking-tree/v1/invite/list'
+        response = requests.get(url, headers=self.headers)
+        response_dict = response.json()
+        # print(response_dict)
+        if response_dict.get('status') == 200:
+            reward_list = response_dict.get('data').get('list')
+            if not reward_list:
+                return
+            for reward in reward_list:
+                if reward.get('status') != 0:  # 为0时才可以领取
+                    continue
+                invitee_user_id = reward.get('inviteeUserId')
+                url = 'https://app.dewu.com/hacking-tree/v1/invite/reward'
+                _json = {'inviteeUserId': invitee_user_id}
+                response = requests.post(url, headers=self.headers, json=_json)
+                response_dict = response.json()
+                if response_dict.get('status') == 200:
+                    droplet = response_dict.get('data').get('droplet')
+                    print(f'获得{droplet}g水滴')
+                    # print(response_dict)
+                    continue
+                print(f'领取助力奖励出现未知错误！ {response_dict}')
+            return
+        print(f'获取助力列表出现未知错误！ {response_dict}')
+        return
+
     # 获取种树进度
     def get_tree_planting_progress(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_tree_info'
@@ -531,32 +559,37 @@ class DeWu:
         print(f"种树进度: {level}级 {user_watering_droplet}/{current_level_need_watering_droplet}")
 
     def main(self):
+        character='★★'
         name, level = self.tree_info()
         print(f'目标：{name}')
         print(f'剩余水滴：{self.get_droplet_number()}')
         # 获取种树进度
         self.get_tree_planting_progress()
+        print(f'{character}开始签到')
         self.droplet_check_in()  # 签到
-        print('开始领取气泡水滴！')
+        print(f'{character}开始领取气泡水滴！')
         self.receive_droplet_extra()
-        print('开始完成每日任务')
+        print(f'{character}开始完成每日任务')
         self.execute_task()
         self.execute_cumulative_task()
-        print('开始领取木桶水滴！')
+        print(f'{character}开始领取木桶水滴')
         self.judging_bucket_droplet()
-        print('开始多次执行浇水，领取浇水奖励')
+        print(f'{character}开始多次执行浇水，领取浇水奖励')
         self.execute_receive_watering_reward()
-        print('开始浇水充满气泡水滴')
+        print(f'{character}开始浇水充满气泡水滴')
         self.waterting_droplet_extra()
-        print('开始进行水滴投资')
+        print(f'{character}开始进行水滴投资')
         self.droplet_invest()
-        print('开始进行助力')
+        print(f'{character}开始进行助力')
         self.help_user()
-        print(f'开始进行浇水直到少于{self.remaining_g}g')
+        print(f'{character}开始领取助力奖励')
+        self.receive_help_reward()
+        print(f'{character}开始进行浇水直到少于{self.remaining_g}g')
         self.waterting_until_less_than()
         print(f'剩余水滴：{self.get_droplet_number()}')
         # 获取种树进度
         self.get_tree_planting_progress()
+
 
 
 # 主程序
