@@ -9,9 +9,8 @@
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
-# 默认助力作者，如不想助力，将 SHARE_CODE_LIST 中的助力码删除，青龙中设置禁止自动拉取该脚本
-# 复制以下组队邀请码，加入我的队伍
-# 1QR œ😼🌿😸😸œ 得物与我组队，一起免费领好礼，最高提速20%。https://dw4.co/t/A/1JA5DlYG
+# 默认助力作者，如不想助力，将 IS_HELP_AUTHOR 的值设置为 False ，青龙中设置禁止自动拉取该脚本
+
 
 import os
 import re
@@ -21,13 +20,29 @@ import requests
 from urllib.parse import urlparse, parse_qs
 
 X_AUTH_TOKEN = []
-SHARE_CODE_LIST = ['🌷👶🌹🙉💬🌺🍀', '💦👻🌻👴😻😽😽']
+SHARE_CODE_LIST = []
+IS_HELP_AUTHOR = True
+
 # X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
 #                 'Bearer eyJhbGciOi*******', ]
 
 dewu_x_auth_token = os.getenv("dewu_x_auth_token")
 if dewu_x_auth_token:
     X_AUTH_TOKEN = dewu_x_auth_token.replace("&", "\n").split("\n")
+
+
+# 下载作者的助力码
+def download_author_share_code():
+    global SHARE_CODE_LIST
+    response = requests.get('https://netcut.cn/p/d3436822ba03c0c3')
+    _list = re.findall(r'"note_content":"(.*?)"', response.text)
+    if _list:
+        share_code_list = _list[0].split(r'\n')
+        SHARE_CODE_LIST += share_code_list
+
+
+if IS_HELP_AUTHOR:
+    download_author_share_code()
 
 
 # 获得地址中 params 中 键为key的值
@@ -219,6 +234,7 @@ class DeWu:
 
     # 领取任务奖励
     def receive_task_reward(self, classify, task_id, task_type):
+        time.sleep(0.2)
         url = 'https://app.dewu.com/hacking-tree/v1/task/receive'
         if task_type in [251, ]:
             _json = {'classify': classify, 'taskId': task_id, 'completeFlag': 1}
