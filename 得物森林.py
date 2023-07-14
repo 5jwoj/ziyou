@@ -42,7 +42,11 @@ def download_author_share_code():
 
 
 if IS_HELP_AUTHOR:
-    download_author_share_code()
+    try:
+        download_author_share_code()
+    except Exception as e:
+        if e:
+            pass
 
 
 # 获得地址中 params 中 键为key的值
@@ -424,7 +428,7 @@ class DeWu:
                 if self.judging_bucket_droplet():
                     self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 else:
-                    print('当前木桶水滴为达到100g，下次来完成任务吧！')
+                    print('当前木桶水滴未达到100g，下次来完成任务吧！')
                 continue
 
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
