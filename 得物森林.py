@@ -603,7 +603,7 @@ class DeWu:
         response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
-        reward_list = response_dict.get('data').get('list')
+        reward_list = response_dict.get('data', {}).get('list')
         if reward_list:
             for reward in reward_list:
                 # 如果任务完成但是未领取
