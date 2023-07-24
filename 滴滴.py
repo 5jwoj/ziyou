@@ -28,9 +28,9 @@ if didi_jifen_token:
 
 
 class DiDi:
-    LAT = '39.91512'  # 纬度
-    LNG = '116.40397'  # 经度
-    CITY_ID = 1  # 城市id
+    LAT = '28.20055'  # 纬度
+    LNG = '113.01907'  # 经度
+    CITY_ID = 24  # 城市id
 
     def __init__(self, token, city_id=CITY_ID, lat=LAT, lng=LNG):
         self.token = token
@@ -163,10 +163,11 @@ class DiDi:
                         batch_id = coupons.get('batch_id')
                         # print(batch_id)
                         print(f"开始领取 {coupons.get('remark')}{coupons.get('coupon_title')}")
-                        url = f"https://member.xiaojukeji.com/dmember/h5/receiveLevelGift?xbiz=110000&prod_key=wyc-vip-level&xpsid=2773d7b034f34bd59441b06315fc153f&dchn=R0paGko&xoid=1P3VkhY1QWiRQtK8RU9TwA&xenv=passenger&xspm_from=&xpsid_root=2773d7b034f34bd59441b06315fc153f&xpsid_from=&xpsid_share=&token={self.token}&batch_id={batch_id}&env={{}}&gift_type=1&city_id={self.city_id}"
+                        url = f"https://member.xiaojukeji.com/dmember/h5/receiveLevelGift?xbiz=&prod_key=wyc-vip-level&xpsid=&dchn=&xoid=&xenv=passenger&xspm_from=&xpsid_root=&xpsid_from=&xpsid_share=&token={self.token}&batch_id={batch_id}&env={{}}&gift_type=1&city_id={self.city_id}"
                         time.sleep(0.5)
                         response = requests.get(url=url)
                         response_dict = response.json()
+                        print(f'{response_dict}')
                         if response_dict.get('errno') == 0:
                             print('领取成功！')
                             continue
