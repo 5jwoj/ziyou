@@ -4,7 +4,7 @@
 # @Author  : ziyou
 # -------------------------------
 # 参考了 一风一燕 的原脚本进行修改
-# cron "2 10,13,15 * * *" script-path=xxx.py,tag=匹配cron用
+# cron "32 10,13,15 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('滴滴')
 # 抓包获取 didi_jifen_token
 # 手机抓包后，在手机点击，福利中心的明细，查看一次福利金明细后，搜索token=，token=xxxx&city，xxx便是 didi_jifen_token。
