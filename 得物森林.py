@@ -432,7 +432,7 @@ class DeWu:
                 continue
 
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
-                             '去95分App逛潮奢尖货', ]:
+                             '去95分App逛潮奢尖货','浏览.*森林入口' ]:
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
@@ -604,7 +604,7 @@ class DeWu:
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('data') is None:
-            return 
+            return
         reward_list = response_dict.get('data', {}).get('list')
         if reward_list:
             for reward in reward_list:
