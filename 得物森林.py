@@ -603,6 +603,8 @@ class DeWu:
         response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         # print(response_dict)
+        if response_dict.get('data') is None:
+            return 
         reward_list = response_dict.get('data', {}).get('list')
         if reward_list:
             for reward in reward_list:
