@@ -13,6 +13,7 @@
 # 主要功能：自动领取我的权益、福利金签到、瓜分福利金、领取完单返福利金...
 # 滴滴
 # export didi_jifen_token='9Op**__w==&9Op**__w==',多账号使用换行或&
+# 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E6%BB%B4%E6%BB%B4.py
 
 import datetime
 import os
