@@ -3,7 +3,7 @@
 # @Time    : 2023/7/6 12:24
 # @Author  : ziyou
 # -------------------------------
-# cron "1 8,12,15,18,22 * * *" script-path=xxx.py,tag=匹配cron用
+# cron "1 8,10,12,15,18,22 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('得物森林')
 # 抓包获取 x_auth_token
 # 得物森林
@@ -432,7 +432,7 @@ class DeWu:
                 continue
 
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
-                             '去95分App逛潮奢尖货','浏览.*森林入口' ]:
+                             '去95分App逛潮奢尖货']:
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
@@ -668,6 +668,7 @@ class DeWu:
         print(f'{character}开始进行浇水直到少于{self.remaining_g}g')
         self.waterting_until_less_than()
         print(f'剩余水滴：{self.get_droplet_number()}')
+        time.sleep(1)
         # 获取种树进度
         self.get_tree_planting_progress()
 
