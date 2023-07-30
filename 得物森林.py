@@ -9,7 +9,7 @@
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
-# 默认助力作者，如不想助力，将 IS_HELP_AUTHOR 的值设置为 False ，青龙中设置禁止自动拉取该脚本
+# 第一个账号助力作者，其余账号依ck顺序助力
 
 
 import os
@@ -21,7 +21,7 @@ from urllib.parse import urlparse, parse_qs
 
 X_AUTH_TOKEN = []
 SHARE_CODE_LIST = []
-IS_HELP_AUTHOR = True
+AUTHOR_SHARE_CODE_LIST = []
 
 # X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
 #                 'Bearer eyJhbGciOi*******', ]
@@ -33,20 +33,19 @@ if dewu_x_auth_token:
 
 # 下载作者的助力码
 def download_author_share_code():
-    global SHARE_CODE_LIST
+    global AUTHOR_SHARE_CODE_LIST
     response = requests.get('https://netcut.cn/p/d3436822ba03c0c3')
     _list = re.findall(r'"note_content":"(.*?)"', response.text)
     if _list:
         share_code_list = _list[0].split(r'\n')
-        SHARE_CODE_LIST += share_code_list
+        AUTHOR_SHARE_CODE_LIST += share_code_list
 
 
-if IS_HELP_AUTHOR:
-    try:
-        download_author_share_code()
-    except Exception as e:
-        if e:
-            pass
+try:
+    download_author_share_code()
+except Exception as e:
+    if e:
+        pass
 
 
 # 获得地址中 params 中 键为key的值
@@ -62,7 +61,8 @@ class DeWu:
     WATERTING_G: int = 40  # 每次浇水克数
     REMAINING_G: int = 1800  # 最后浇水剩余不超过的克数
 
-    def __init__(self, x_auth_token, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
+    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
+        self.index = index
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
@@ -210,7 +210,6 @@ class DeWu:
         if response_dict.get('code') != 200:
             print(f"获取助力码失败! {response_dict}")
             return
-        keyword = response_dict.get('data').get('keyword')
         keyword_desc = response_dict.get('data').get('keywordDesc').replace('\n', '')
         print(f"获取助力码成功! {keyword_desc}")
 
@@ -431,6 +430,16 @@ class DeWu:
                     print('当前木桶水滴未达到100g，下次来完成任务吧！')
                 continue
 
+            if task_name == '浏览【我】的右上角星愿森林入口':
+                _json = _json = {"action": task_id}
+                url = 'https://app.dewu.com/hacking-tree/v1/user/report_action'
+                response = self.session.post(url, headers=self.headers, json=_json)  # 提交完成状态
+                response_dict = response.json()
+                # print(response_dict)
+                if response_dict.get('code') == 200:
+                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                continue
+
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
                              '去95分App逛潮奢尖货']:
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
@@ -559,13 +568,27 @@ class DeWu:
 
     # 助力
     def help_user(self):
+        if self.index == 0:
+            for share_code in AUTHOR_SHARE_CODE_LIST:
+                url = 'https://app.dewu.com/hacking-tree/v1/user/init'
+                _json = {'keyword': share_code}
+                response = self.session.post(url, headers=self.headers, json=_json)
+                response_dict = response.json()
+                if '成功' in response_dict.get('data').get('inviteRes'):
+                    print(f'开始助力 {share_code}', end=' ')
+                    print(response_dict.get('data').get('inviteRes'))
+                    return
+                time.sleep(1)
         for share_code in SHARE_CODE_LIST:
             print(f'开始助力 {share_code}', end=' ')
             url = 'https://app.dewu.com/hacking-tree/v1/user/init'
             _json = {'keyword': share_code}
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
+            # print(response_dict)
             print(response_dict.get('data').get('inviteRes'))
+            if response_dict.get('data').get('inviteRes') == '助力失败，今日已助力过了':
+                return
             time.sleep(1)
         return
 
@@ -620,6 +643,20 @@ class DeWu:
                     print(f'领取合种上线奖励出现未知错误！ {response_dict}')
             return
 
+    # 领取空中水滴
+    def receive_air_drop(self):
+        while True:
+            url = 'https://app.dewu.com/hacking-tree/v1/droplet/air_drop_receive'
+            _json = {"clickCount": 20, "time": int(time.time())}
+            response = self.session.post(url, headers=self.headers, json=_json)
+            response_dict = response.json()
+            # print(response_dict)
+            if response_dict.get('data').get('isOk') is True:
+                print(f'获得{response_dict.get("data").get("droplet")}g水滴')
+                time.sleep(1)
+                continue
+            return
+
     # 获取种树进度
     def get_tree_planting_progress(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_tree_info'
@@ -659,6 +696,8 @@ class DeWu:
         self.waterting_droplet_extra()
         print(f'{character}开始领取合种上线奖励')
         self.receive_hybrid_online_reward()
+        print(f'{character}开始领取空中水滴')
+        self.receive_air_drop()
         print(f'{character}开始进行水滴投资')
         self.droplet_invest()
         print(f'{character}开始进行助力')
@@ -682,10 +721,10 @@ def main(ck_list):
     print('开始获取所有账号助力码')
     for index, ck in enumerate(ck_list):
         print(f'第{index + 1}个账号：', end='')
-        SHARE_CODE_LIST.append(DeWu(ck).get_share_code())
+        SHARE_CODE_LIST.append(DeWu(ck, index).get_share_code())
     for index, ck in enumerate(ck_list):
         print(f'*****第{index + 1}个账号*****')
-        DeWu(ck).main()
+        DeWu(ck, index).main()
         print('')
 
 
