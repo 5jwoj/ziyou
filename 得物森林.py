@@ -137,7 +137,7 @@ class DeWu:
                 if temporary_number != water_droplet_number:  # 如果二者相等，说明浇水成功 但奖励没变化 不再浇水 直接领取
                     temporary_number = water_droplet_number
                     if water_droplet_number < 60:
-                        print(f'当前气泡水滴未满，开始浇水！')
+                        print(f'当前气泡水滴{water_droplet_number}g，未满，开始浇水！')
                         if self.waterting():  # 成功浇水 继续 否则 直接领取
                             time.sleep(1)
                             continue  # 浇水成功后查询信息
@@ -568,26 +568,27 @@ class DeWu:
 
     # 助力
     def help_user(self):
+        url = 'https://app.dewu.com/hacking-tree/v1/user/init'
         if self.index == 0:
             for share_code in AUTHOR_SHARE_CODE_LIST:
-                url = 'https://app.dewu.com/hacking-tree/v1/user/init'
                 _json = {'keyword': share_code}
                 response = self.session.post(url, headers=self.headers, json=_json)
                 response_dict = response.json()
-                if '成功' in response_dict.get('data').get('inviteRes'):
+                invite_res = response_dict.get('data').get('inviteRes')
+                if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                     print(f'开始助力 {share_code}', end=' ')
-                    print(response_dict.get('data').get('inviteRes'))
+                    print(invite_res)
                     return
                 time.sleep(1)
         for share_code in SHARE_CODE_LIST:
             print(f'开始助力 {share_code}', end=' ')
-            url = 'https://app.dewu.com/hacking-tree/v1/user/init'
             _json = {'keyword': share_code}
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             # print(response_dict)
-            print(response_dict.get('data').get('inviteRes'))
-            if response_dict.get('data').get('inviteRes') == '助力失败，今日已助力过了':
+            invite_res = response_dict.get('data').get('inviteRes')
+            print(invite_res)
+            if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                 return
             time.sleep(1)
         return
@@ -722,6 +723,7 @@ def main(ck_list):
     for index, ck in enumerate(ck_list):
         print(f'第{index + 1}个账号：', end='')
         SHARE_CODE_LIST.append(DeWu(ck, index).get_share_code())
+        time.sleep(0.5)
     for index, ck in enumerate(ck_list):
         print(f'*****第{index + 1}个账号*****')
         DeWu(ck, index).main()
