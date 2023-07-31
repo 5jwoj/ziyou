@@ -301,7 +301,7 @@ class DeWu:
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') != 200:
-            print(f"浇水失败! {response_dict}")
+            print(f"浇水失败! {response_dict.get('msg')}")
             return False
         print(f"成功浇水{self.waterting_g}g! ")
         if response_dict.get('data').get('nextWateringTimes') == 0:
