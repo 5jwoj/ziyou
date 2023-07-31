@@ -112,7 +112,7 @@ class DeWu:
         # print(response_dict)
         if response_dict.get('code') == 200:
             # 暂时设置，看看礼盒是什么先
-            print(f"签到成功,获得{response_dict.get('data').get('Num')}g水滴！")
+            print(f"签到成功,获得{response_dict.get('data').get('Num')}g水滴")
             return
         print(f"签到失败！ {response_dict.get('msg')}")
 
@@ -137,7 +137,7 @@ class DeWu:
                 if temporary_number != water_droplet_number:  # 如果二者相等，说明浇水成功 但奖励没变化 不再浇水 直接领取
                     temporary_number = water_droplet_number
                     if water_droplet_number < 60:
-                        print(f'当前气泡水滴{water_droplet_number}g，未满，开始浇水！')
+                        print(f'当前气泡水滴{water_droplet_number}g，未满，开始浇水')
                         if self.waterting():  # 成功浇水 继续 否则 直接领取
                             time.sleep(1)
                             continue  # 浇水成功后查询信息
@@ -196,7 +196,7 @@ class DeWu:
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('data').get('currentDroplet') == 100:
-            print(f"今天已领取木桶水滴{response_dict.get('data').get('getTimes')}次！")
+            print(f"今天已领取木桶水滴{response_dict.get('data').get('getTimes')}次")
             self.receive_bucket_droplet()
             return True
         return False
@@ -288,7 +288,7 @@ class DeWu:
             return False
         print(f"成功浇水{self.waterting_g}g! ")
         if response_dict.get('data').get('nextWateringTimes') == 0:
-            print('开始领取浇水奖励！')
+            print('开始领取浇水奖励')
             time.sleep(1)
             self.receive_watering_reward()
         return True
@@ -305,7 +305,7 @@ class DeWu:
             return False
         print(f"成功浇水{self.waterting_g}g! ")
         if response_dict.get('data').get('nextWateringTimes') == 0:
-            print('开始领取浇水奖励！')
+            print('开始领取浇水奖励')
             time.sleep(1)
             self.receive_watering_reward()
         return True
@@ -462,7 +462,7 @@ class DeWu:
             if any(re.match(pattern, task_name) for pattern in ['.*逛逛.*', '浏览.*15s']):
                 _json = {'taskId': task_id, 'taskType': task_type, 'btd': btd}
                 if self.task_commit_pre(_json):
-                    print(f'等待16秒！')
+                    print(f'等待16秒')
                     time.sleep(16)
                     _json = {'taskId': task_id, 'taskType': str(task_type), 'activityType': None, 'activityId': None,
                              'taskSetId': None, 'venueCode': None, 'venueUnitStyle': None, 'taskScene': None,
@@ -474,7 +474,7 @@ class DeWu:
             if any(re.match(pattern, task_name) for pattern in ['.*晒图.*']):
                 _json = {'taskId': task_id, 'taskType': task_type}
                 if self.task_commit_pre(_json):
-                    print(f'等待16秒！')
+                    print(f'等待16秒')
                     time.sleep(16)
                     _json = {'taskId': task_id, 'taskType': str(task_type), 'activityType': None, 'activityId': None,
                              'taskSetId': None, 'venueCode': None, 'venueUnitStyle': None, 'taskScene': None}
@@ -500,7 +500,7 @@ class DeWu:
                 if self.task_obtain(task_id, task_type):
                     _json = {'taskId': task_id, 'taskType': 16}
                     if self.task_commit_pre(_json):
-                        print(f'等待16秒！')
+                        print(f'等待16秒')
                         time.sleep(16)
                         _json = {'taskId': task_id, 'taskType': str(task_type)}
                         self.submit_task_completion_status(_json)  # 提交完成状态
@@ -562,7 +562,7 @@ class DeWu:
             keyword = response_dict.get('data').get('keyword')
             keyword = re.findall('œ(.*?)œ ', keyword)
             if keyword:
-                print(f'获取助力码成功！ {keyword[0]}')
+                print(f'获取助力码成功 {keyword[0]}')
                 return keyword[0]
         print('获取助力码失败！')
 
@@ -684,10 +684,11 @@ class DeWu:
         self.get_tree_planting_progress()
         print(f'{character}开始签到')
         self.droplet_check_in()  # 签到
-        print(f'{character}开始领取气泡水滴！')
+        print(f'{character}开始领取气泡水滴')
         self.receive_droplet_extra()
         print(f'{character}开始完成每日任务')
         self.execute_task()
+        print(f'{character}开始领取累计任务奖励')
         self.execute_cumulative_task()
         print(f'{character}开始领取木桶水滴')
         self.judging_bucket_droplet()
