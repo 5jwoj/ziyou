@@ -28,7 +28,7 @@ AUTHOR_SHARE_CODE_LIST = []
 
 dewu_x_auth_token = os.getenv("dewu_x_auth_token")
 if dewu_x_auth_token:
-    X_AUTH_TOKEN = dewu_x_auth_token.replace("&", "\n").split("\n")
+    X_AUTH_TOKEN += dewu_x_auth_token.replace("&", "\n").split("\n")
 
 
 # 下载作者的助力码
@@ -39,13 +39,6 @@ def download_author_share_code():
     if _list:
         share_code_list = _list[0].split(r'\n')
         AUTHOR_SHARE_CODE_LIST += share_code_list
-
-
-try:
-    download_author_share_code()
-except Exception as e:
-    if e:
-        pass
 
 
 # 获得地址中 params 中 键为key的值
@@ -748,12 +741,16 @@ class DeWu:
         self.get_tree_planting_progress()  # 获取种树进度
 
 
-
 # 主程序
 def main(ck_list):
     if not ck_list:
         print('没有获取到账号！')
         return
+    try:
+        download_author_share_code()
+    except Exception as e:
+        if e:
+            pass
     print(f'获取到{len(ck_list)}个账号！')
     print('开始获取所有账号助力码')
     for index, ck in enumerate(ck_list):
