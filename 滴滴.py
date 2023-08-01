@@ -4,7 +4,7 @@
 # @Author  : ziyou
 # -------------------------------
 # 参考了 一风一燕 的原脚本进行修改
-# cron "32 10,13,15 * * *" script-path=xxx.py,tag=匹配cron用
+# cron "0 8,10,13,14,15,17 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('滴滴')
 # 抓包获取 didi_jifen_token
 # 手机抓包后，在手机点击，福利中心的明细，查看一次福利金明细后，搜索token=，token=xxxx&city，xxx便是 didi_jifen_token。
@@ -295,6 +295,33 @@ class DiDi:
                 print(f'领取出错！ {response_dict}')
                 return
 
+    # 天天领神券签到
+    def claim_coupon_check_in(self):
+        url = 'https://ut.xiaojukeji.com/ut/janitor/api/action/sign/do'
+        headers = {'Didi-Ticket': self.token}
+        response = requests.post(url=url, headers=headers)
+        response_dict = response.json()
+        # print(response_dict)
+        if response_dict.get('errno') == 0:
+            print(f'签到成功！')
+        print(f'签到失败！{response_dict.get("errmsg")}')
+
+    # 天天领神券抽奖
+    def claim_coupon_lottery(self):
+        while True:
+            url = 'https://ut.xiaojukeji.com/ut/janitor/api/action/lottery/doLottery'
+            headers = {'Didi-Ticket': self.token}
+            _json = {"act_id": "212743363044"}
+            response = requests.post(url=url, headers=headers, json=_json)
+            response_dict = response.json()
+            # print(response_dict)
+            if response_dict.get('errno') == 0:
+                print(f'抽奖成功！获得{response_dict.get("data").get("prize_data")[0].get("name")}')
+                time.sleep(2)
+                continue
+            print(f'抽奖失败！{response_dict.get("errmsg")}')
+            return
+
     def main(self):
         character = '★★'
         print(f'{character}当前福利金数量为：{self.get_info()}')
@@ -327,7 +354,12 @@ class DiDi:
         self.receive_memberday_discount_multi()
         print(f'{character}开始领取气泡奖励')
         self.receive_wyc_order_finish()
+        print(f'{character}开始天天领神券签到')
+        self.claim_coupon_check_in()
+        print(f'{character}开始天天领神券抽奖')
+        self.claim_coupon_lottery()
         print(f'{character}当前福利金数量为：{self.get_info()}')
+
 
 
 # 主程序
