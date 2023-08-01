@@ -156,7 +156,7 @@ class DiDi:
     def receive_level_gift(self):
         privileges_list = self.inquire_benefits_details()
         for privileges in privileges_list:
-            if privileges.get('name') == '周周领券':
+            if privileges.get('name') in ['周周领券', '月月领券']:
                 if privileges.get('level_gift') is None:
                     continue
                 coupons_list = privileges.get('level_gift', {}).get('coupons', [])
@@ -170,18 +170,17 @@ class DiDi:
                         time.sleep(0.5)
                         response = requests.get(url=url)
                         response_dict = response.json()
-                        print(f'{response_dict}')
+                        # print(f'{response_dict}')
                         if response_dict.get('errno') == 0:
                             print('领取成功！')
                             continue
                         print(f'领取出错！ {response_dict}')
-                return
 
     # 膨胀 周周领券 活动的优惠券
     def swell_coupon(self):
         privileges_list = self.inquire_benefits_details()  # 我的权益列表
         for privileges in privileges_list:
-            if privileges.get('name') == '周周领券':
+            if privileges.get('name') in ['周周领券', '月月领券']:
                 if privileges.get('level_gift') is None:
                     continue
                 coupons_list = privileges.get('level_gift', {}).get('coupons', [])
@@ -200,7 +199,7 @@ class DiDi:
                         time.sleep(0.5)
                         response = requests.post(url=url, json=_json)
                         response_dict = response.json()
-                        print(response_dict)
+                        # print(response_dict)
                         if response_dict.get('error') == 0:
                             if response_dict.get('data', {}).get('is_swell') is True:
                                 print('膨胀成功！')
@@ -318,9 +317,9 @@ class DiDi:
                 print('今天已经报名参加瓜分明天的福利金了！')
             else:
                 print('报名参加瓜分明天的福利金出现未知错误！')
-        print(f'{character}开始领取 周周领券 活动的优惠券')
+        print(f'{character}开始领取 周周或月月领券 活动的优惠券')
         self.receive_level_gift()
-        print(f'{character}开始膨胀 周周领券 活动的优惠券')
+        print(f'{character}开始膨胀 周周或月月领券 活动的优惠券')
         self.swell_coupon()
         print(f'{character}开始领取行程意外险')
         self.receive_travel_insurance()
