@@ -139,7 +139,7 @@ class DeWu:
                     if water_droplet_number < 60:
                         print(f'当前气泡水滴{water_droplet_number}g，未满，开始浇水')
                         if self.waterting():  # 成功浇水 继续 否则 直接领取
-                            time.sleep(1)
+                            time.sleep(0.5)
                             continue  # 浇水成功后查询信息
                 print(f"当前可领取气泡水滴{water_droplet_number}g")
                 url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/receive'
@@ -176,7 +176,7 @@ class DeWu:
             for _ in range(count):
                 if not self.waterting():  # 无法浇水时退出
                     return
-                time.sleep(1)
+                time.sleep(0.5)
 
     # 领取木桶水滴,200秒满一次,每天领取3次
     def receive_bucket_droplet(self):
@@ -286,7 +286,7 @@ class DeWu:
         if response_dict.get('code') != 200:
             print(f"浇水失败! {response_dict}")
             return False
-        print(f"成功浇水{self.waterting_g}g! ")
+        print(f"成功浇水{self.waterting_g}g")
         if response_dict.get('data').get('nextWateringTimes') == 0:
             print('开始领取浇水奖励')
             time.sleep(1)
@@ -326,7 +326,7 @@ class DeWu:
             for _ in range(count):
                 if not self.waterting():  # 无法浇水时退出
                     return
-                time.sleep(1)
+                time.sleep(0.5)
 
     # 浇水直到少于 指定克数
     def waterting_until_less_than(self):
@@ -336,7 +336,7 @@ class DeWu:
             for _ in range(count + 1):
                 if not self.waterting():  # 无法浇水时退出
                     return
-                time.sleep(1)
+                time.sleep(0.5)
 
     # 提交任务完成状态
     def submit_task_completion_status(self, _json):
@@ -490,7 +490,7 @@ class DeWu:
                 for _ in range(count):
                     if not self.waterting():  # 无法浇水时退出
                         continue
-                    time.sleep(1)
+                    time.sleep(0.5)
                 _json = {'taskId': tasks_dict['taskId'], 'taskType': str(tasks_dict['taskType'])}
                 if self.submit_task_completion_status(_json):
                     self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
@@ -658,6 +658,41 @@ class DeWu:
                 continue
             return
 
+    # 点击8个商品获得水滴
+    def click_product(self):
+        product_list = [{"spuId": 3030863, "timestamp": 1690790735382, "sign": "2889b16b3077c5719288d105a14ffa1e"},
+                        {"spuId": 4673547, "timestamp": 1690790691956, "sign": "cc3cc95253d29a03fc6e79bfe2200143"},
+                        {"spuId": 1502607, "timestamp": 1690791565022, "sign": "04951eac012785ccb2600703a92c037b"},
+                        {"spuId": 2960612, "timestamp": 1690791593097, "sign": "fb667d45bc3950a7beb6e3fa0fc05089"},
+                        {"spuId": 3143593, "timestamp": 1690791613243, "sign": "82b9fda61be79f7b8833087508d6abe2"},
+                        {"spuId": 3067054, "timestamp": 1690791639606, "sign": "2808f3c7cf2ededea17d3f70a2dc565d"},
+                        {"spuId": 4448037, "timestamp": 1690791663078, "sign": "335bc519ee9183c086beb009adf93738"},
+                        {"spuId": 3237561, "timestamp": 1690791692553, "sign": "5c113b9203a510b7068b3cd0f6b7c25e"},
+                        {"spuId": 3938180, "timestamp": 1690792014889, "sign": "3841c0272443dcbbab0bcb21c94c6262"}, ]
+        for product in product_list:
+            url = 'https://app.dewu.com/hacking-tree/v1/product/spu'
+            _json = product
+            response = self.session.post(url, headers=self.headers, json=_json)
+            response_dict = response.json()
+            # print(response_dict)
+            if response_dict.get('data') is None:
+                print(f'今天已经完成过该任务了！')
+                return
+            if response_dict.get('data', {}).get('isReceived') is True:
+                print(f'获得{response_dict.get("data").get("dropLetReward")}g水滴')
+                return
+            time.sleep(1)
+
+    # 领取发现水滴
+    def receive_discover_droplet(self):
+        while True:
+            url = 'https://app.dewu.com/hacking-tree/v1/product/task/seek-receive'
+            _json = {"sign": "9888433e6d10b514e5b5be4305d123f0", "timestamp": int(time.time() * 1000)}
+            response = self.session.post(url, headers=self.headers, json=_json)
+            response_dict = response.json()
+            print(response_dict)
+            pass
+
     # 获取种树进度
     def get_tree_planting_progress(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_tree_info'
@@ -678,10 +713,8 @@ class DeWu:
         name, level = self.tree_info()
         print(f'目标：{name}')
         print(f'剩余水滴：{self.get_droplet_number()}')
-        # 判断是否是团队树
-        self.determine_whether_is_team_tree()
-        # 获取种树进度
-        self.get_tree_planting_progress()
+        self.determine_whether_is_team_tree()  # 判断是否是团队树
+        self.get_tree_planting_progress()  # 获取种树进度
         print(f'{character}开始签到')
         self.droplet_check_in()  # 签到
         print(f'{character}开始领取气泡水滴')
@@ -702,6 +735,8 @@ class DeWu:
         self.receive_air_drop()
         print(f'{character}开始进行水滴投资')
         self.droplet_invest()
+        print(f'{character}开始点击8个商品获得水滴')
+        self.click_product()
         print(f'{character}开始进行助力')
         self.help_user()
         print(f'{character}开始领取助力奖励')
@@ -710,8 +745,8 @@ class DeWu:
         self.waterting_until_less_than()
         print(f'剩余水滴：{self.get_droplet_number()}')
         time.sleep(1)
-        # 获取种树进度
-        self.get_tree_planting_progress()
+        self.get_tree_planting_progress()  # 获取种树进度
+
 
 
 # 主程序
