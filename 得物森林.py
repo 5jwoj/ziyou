@@ -13,6 +13,7 @@
 
 
 import os
+import random
 import re
 import sys
 import time
@@ -572,7 +573,7 @@ class DeWu:
                     print(f'开始助力 {share_code}', end=' ')
                     print(invite_res)
                     return
-                time.sleep(1)
+                time.sleep(random.randint(1, 3))
         for share_code in SHARE_CODE_LIST:
             print(f'开始助力 {share_code}', end=' ')
             _json = {'keyword': share_code}
@@ -583,7 +584,7 @@ class DeWu:
             print(invite_res)
             if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                 return
-            time.sleep(1)
+            time.sleep(random.randint(1, 3))
         return
 
     # 领取助力奖励
