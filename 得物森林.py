@@ -317,7 +317,8 @@ class DeWu:
             response = self.session.get(url, headers=self.headers)
             response_dict = response.json()
             # print(response_dict)
-            if response_dict.get('code') != 200:
+            if not response_dict.get('data').get('wateringReward') or \
+                    not response_dict.get('data').get('nextWateringTimes'):  # 没有奖励时退出
                 print(f"获取种树进度失败! {response_dict}")
                 return
             if not response_dict.get('data').get('wateringReward'):  # 没有奖励时退出
