@@ -157,6 +157,8 @@ class DiDi:
         privileges_list = self.inquire_benefits_details()
         for privileges in privileges_list:
             if privileges.get('name') == '周周领券':
+                if privileges.get('level_gift') is None:
+                    continue
                 coupons_list = privileges.get('level_gift', {}).get('coupons', [])
                 for coupons in coupons_list:
                     status = coupons.get('status')  # 0为未领取，1为已使用，2为未使用
@@ -180,6 +182,8 @@ class DiDi:
         privileges_list = self.inquire_benefits_details()  # 我的权益列表
         for privileges in privileges_list:
             if privileges.get('name') == '周周领券':
+                if privileges.get('level_gift') is None:
+                    continue
                 coupons_list = privileges.get('level_gift', {}).get('coupons', [])
                 for coupons in coupons_list:  # 膨胀
                     swell_status = coupons.get('swell_status')  # 0代表不能膨胀，1代表能膨胀,2代表已膨胀
