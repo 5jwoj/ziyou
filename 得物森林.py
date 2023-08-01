@@ -314,9 +314,9 @@ class DeWu:
             if response_dict.get('code') != 200:
                 print(f"获取种树进度失败! {response_dict}")
                 return
-            if not response_dict.get('data').get('wateringReward'):  # 没有奖励时退出
+            count = response_dict.get('data').get('nextWateringTimes')  # 获取浇水奖励还需要的浇水次数
+            if response_dict.get('data').get('wateringReward') is None or count <= 0:  # 没有奖励时退出
                 return
-            count = response_dict.get('data').get('nextWateringTimes')
             for _ in range(count):
                 if not self.waterting():  # 无法浇水时退出
                     return
@@ -573,7 +573,7 @@ class DeWu:
                     print(f'开始助力 {share_code}', end=' ')
                     print(invite_res)
                     return
-                time.sleep(random.randint(1, 3))
+                time.sleep(random.randint(15, 30) / 10)
         for share_code in SHARE_CODE_LIST:
             print(f'开始助力 {share_code}', end=' ')
             _json = {'keyword': share_code}
@@ -584,7 +584,7 @@ class DeWu:
             print(invite_res)
             if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                 return
-            time.sleep(random.randint(1, 3))
+            time.sleep(random.randint(15, 30) / 10)
         return
 
     # 领取助力奖励
@@ -708,38 +708,38 @@ class DeWu:
         print(f'目标：{name}')
         print(f'剩余水滴：{self.get_droplet_number()}')
         self.determine_whether_is_team_tree()  # 判断是否是团队树
-        self.get_tree_planting_progress()  # 获取种树进度
-        print(f'{character}开始签到')
-        self.droplet_check_in()  # 签到
-        print(f'{character}开始领取气泡水滴')
-        self.receive_droplet_extra()
-        print(f'{character}开始完成每日任务')
-        self.execute_task()
-        print(f'{character}开始领取累计任务奖励')
-        self.execute_cumulative_task()
-        print(f'{character}开始领取木桶水滴')
-        self.judging_bucket_droplet()
-        print(f'{character}开始多次执行浇水，领取浇水奖励')
+        # self.get_tree_planting_progress()  # 获取种树进度
+        # print(f'{character}开始签到')
+        # self.droplet_check_in()  # 签到
+        # print(f'{character}开始领取气泡水滴')
+        # self.receive_droplet_extra()
+        # print(f'{character}开始完成每日任务')
+        # self.execute_task()
+        # print(f'{character}开始领取累计任务奖励')
+        # self.execute_cumulative_task()
+        # print(f'{character}开始领取木桶水滴')
+        # self.judging_bucket_droplet()
+        # print(f'{character}开始多次执行浇水，领取浇水奖励')
         self.execute_receive_watering_reward()
-        print(f'{character}开始浇水充满气泡水滴')
-        self.waterting_droplet_extra()
-        print(f'{character}开始领取合种上线奖励')
-        self.receive_hybrid_online_reward()
-        print(f'{character}开始领取空中水滴')
-        self.receive_air_drop()
-        print(f'{character}开始进行水滴投资')
-        self.droplet_invest()
-        print(f'{character}开始点击8个商品获得水滴')
-        self.click_product()
-        print(f'{character}开始进行助力')
-        self.help_user()
-        print(f'{character}开始领取助力奖励')
-        self.receive_help_reward()
-        print(f'{character}开始进行浇水直到少于{self.remaining_g}g')
-        self.waterting_until_less_than()
-        print(f'剩余水滴：{self.get_droplet_number()}')
-        time.sleep(1)
-        self.get_tree_planting_progress()  # 获取种树进度
+        # print(f'{character}开始浇水充满气泡水滴')
+        # self.waterting_droplet_extra()
+        # print(f'{character}开始领取合种上线奖励')
+        # self.receive_hybrid_online_reward()
+        # print(f'{character}开始领取空中水滴')
+        # self.receive_air_drop()
+        # print(f'{character}开始进行水滴投资')
+        # self.droplet_invest()
+        # print(f'{character}开始点击8个商品获得水滴')
+        # self.click_product()
+        # print(f'{character}开始进行助力')
+        # self.help_user()
+        # print(f'{character}开始领取助力奖励')
+        # self.receive_help_reward()
+        # print(f'{character}开始进行浇水直到少于{self.remaining_g}g')
+        # self.waterting_until_less_than()
+        # print(f'剩余水滴：{self.get_droplet_number()}')
+        # time.sleep(1)
+        # self.get_tree_planting_progress()  # 获取种树进度
 
 
 # 主程序
