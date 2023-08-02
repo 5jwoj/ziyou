@@ -304,6 +304,7 @@ class DiDi:
         # print(response_dict)
         if response_dict.get('errno') == 0:
             print(f'签到成功！')
+            return 
         print(f'签到失败！{response_dict.get("errmsg")}')
 
     # 天天领神券抽奖
@@ -317,7 +318,7 @@ class DiDi:
             # print(response_dict)
             if response_dict.get('errno') == 0:
                 print(f'抽奖成功！获得{response_dict.get("data").get("prize_data")[0].get("name")}')
-                time.sleep(2)
+                time.sleep(5)
                 continue
             print(f'抽奖失败！{response_dict.get("errmsg")}')
             return
