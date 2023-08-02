@@ -521,6 +521,10 @@ class DeWu:
             self.received_droplet_invest()
         else:
             print('今日已领取过水滴投资奖励了')
+        time.sleep(1)
+        url = 'https://app.dewu.com/hacking-tree/v1/invest/info'
+        response = self.session.get(url, headers=self.headers)
+        response_dict = response.json()
         if response_dict.get('data').get('triggered') is True:  # 可投资
             url = 'https://app.dewu.com/hacking-tree/v1/invest/commit'
             response = self.session.post(url, headers=self.headers)
@@ -573,7 +577,7 @@ class DeWu:
                     print(f'开始助力 {share_code}', end=' ')
                     print(invite_res)
                     return
-                time.sleep(random.randint(15, 30) / 10)
+                time.sleep(random.randint(20, 30) / 10)
         for share_code in SHARE_CODE_LIST:
             print(f'开始助力 {share_code}', end=' ')
             _json = {'keyword': share_code}
@@ -584,7 +588,7 @@ class DeWu:
             print(invite_res)
             if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                 return
-            time.sleep(random.randint(15, 30) / 10)
+            time.sleep(random.randint(20, 30) / 10)
         return
 
     # 领取助力奖励
