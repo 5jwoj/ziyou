@@ -42,7 +42,7 @@ def download_author_share_code():
         AUTHOR_SHARE_CODE_LIST += share_code_list
 
 
-# 获得地址中 params 中 键为key的值
+# 获得url params 中键为key的值
 def get_url_key_value(url, key):
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
@@ -259,15 +259,21 @@ class DeWu:
 
     # 领取等级奖励
     def receive_level_reward(self):
-        url = 'https://app.dewu.com/hacking-tree/v1/tree/get_level_reward'
-        _json = {'promote': ''}
-        response = self.session.post(url, headers=self.headers, json=_json)
-        response_dict = response.json()
-        # print(response_dict)
-        if response_dict.get('code') != 200:
-            print(f"领取浇水奖励失败! {response_dict}")
-            return
-        print(f"领取浇水奖励成功! 获得{response_dict.get('data').get('currentWateringReward').get('rewardNum')}g水滴")
+        while True:
+            url = 'https://app.dewu.com/hacking-tree/v1/tree/get_level_reward'
+            _json = {'promote': ''}
+            response = self.session.post(url, headers=self.headers, json=_json)
+            response_dict = response.json()
+            # print(response_dict)
+            if response_dict.get('code') != 200:
+                print(f"领取等级奖励失败! {response_dict.get('msg')}")
+                return
+            level = response_dict.get('data').get('levelReward').get('showLevel') - 1
+            reward_num = response_dict.get('data').get('currentWateringReward').get('rewardNum')
+            print(f"领取{level}级奖励成功! 获得{reward_num}g水滴")
+            if response_dict.get('data').get('levelReward').get('isComplete') is False:
+                return
+            time.sleep(1)
 
     # 浇水
     def waterting(self):
@@ -297,7 +303,7 @@ class DeWu:
         if response_dict.get('code') != 200:
             print(f"浇水失败! {response_dict}")
             return False
-        print(f"成功浇水{self.waterting_g}g! ")
+        print(f"成功浇水{self.waterting_g}g")
         if response_dict.get('data').get('nextWateringTimes') == 0:
             print('开始领取浇水奖励')
             time.sleep(1)
@@ -352,14 +358,6 @@ class DeWu:
             self.tasks_completed_number = response_dict.get('data').get('userStep')  # 任务完成数量
             self.cumulative_tasks_list = response_dict.get('data').get('extraAwardList')  # 累计任务列表
             self.tasks_dict_list = response_dict.get('data').get('taskList')  # 任务列表
-            # 'taskId' 任务ID
-            # 'taskName' 任务名字
-            # 'isComplete' 是否未完成
-            # 'isReceiveReward' 完成后是否领取奖励
-            # 'taskType'任务类型
-            # 'rewardCount' 完成任务所获得的奖励水滴
-            # 'isObtain' 是否完成任务前置要求
-            # 'jumpUrl' 是否完成任务前置要求
             return True
 
     # 水滴大放送任务步骤1
@@ -391,6 +389,14 @@ class DeWu:
                 continue
             if tasks_dict.get('rewardCount') >= 3000:  # 获取水滴超过3000的，需要下单，跳过
                 continue
+            # 'taskId' 任务ID
+            # 'taskName' 任务名字
+            # 'isComplete' 是否未完成
+            # 'isReceiveReward' 完成后是否领取奖励
+            # 'taskType'任务类型
+            # 'rewardCount' 完成任务所获得的奖励水滴
+            # 'isObtain' 是否完成任务前置要求
+            # 'jumpUrl' 是否完成任务前置要求
             classify = tasks_dict.get('classify')
             task_id = tasks_dict.get('taskId')
             task_type = tasks_dict.get('taskType')
@@ -739,6 +745,8 @@ class DeWu:
         self.help_user()
         print(f'{character}开始领取助力奖励')
         self.receive_help_reward()
+        print(f'{character}开始领取等级奖励')
+        self.receive_level_reward()
         print(f'{character}开始进行浇水直到少于{self.remaining_g}g')
         self.waterting_until_less_than()
         print(f'剩余水滴：{self.get_droplet_number()}')
