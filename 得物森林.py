@@ -265,11 +265,11 @@ class DeWu:
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             # print(response_dict)
-            if response_dict.get('code') != 200:
+            if response_dict.get('code') != 200 or response_dict.get('data') is None:
                 print(f"领取等级奖励失败! {response_dict.get('msg')}")
                 return
             level = response_dict.get('data').get('levelReward').get('showLevel') - 1
-            reward_num = response_dict.get('data').get('currentWateringReward').get('rewardNum')
+            reward_num = response_dict.get('data').get('currentLevelReward').get('rewardNum')
             print(f"领取{level}级奖励成功! 获得{reward_num}g水滴")
             if response_dict.get('data').get('levelReward').get('isComplete') is False:
                 return
@@ -441,7 +441,7 @@ class DeWu:
                 continue
 
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
-                             '去95分App逛潮奢尖货']:
+                             '去95分App逛潮奢尖货','参与1次拆盲盒']:
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
@@ -496,7 +496,7 @@ class DeWu:
                     self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                     continue
 
-            if any(re.match(pattern, task_name) for pattern in ['.*好物.*专场', '水滴大放送']):
+            if any(re.match(pattern, task_name) for pattern in ['.*好物.*专场', '.*水滴大放送']):
                 if self.task_obtain(task_id, task_type):
                     _json = {'taskId': task_id, 'taskType': 16}
                     if self.task_commit_pre(_json):
@@ -776,7 +776,6 @@ class DeWu:
         print(f'剩余水滴：{self.get_droplet_number()}')
         time.sleep(1)
         self.get_tree_planting_progress()  # 获取种树进度
-
 
 
 # 主程序
