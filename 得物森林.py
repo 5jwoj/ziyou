@@ -496,7 +496,7 @@ class DeWu:
                     self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                     continue
 
-            if task_type == 251 and '水滴大放送' in task_name:
+            if any(re.match(pattern, task_name) for pattern in ['.*好物.*专场', '水滴大放送']):
                 if self.task_obtain(task_id, task_type):
                     _json = {'taskId': task_id, 'taskType': 16}
                     if self.task_commit_pre(_json):
@@ -697,6 +697,28 @@ class DeWu:
             print(response_dict)
             pass
 
+    # 领取品牌特惠奖励
+    def receive_brand_specials(self):
+        url = 'https://app.dewu.com/hacking-ad/v1/activity/list?bizId=tree'
+        response = self.session.get(url, headers=self.headers)
+        response_dict = response.json()
+        # print(response_dict)
+        if response_dict.get('data') is None:
+            print('当前没有可以完成的任务！')
+            return
+        ad_list = response_dict.get('data').get('list')
+        for ad in ad_list:
+            if ad.get('isReceived') is True:
+                continue
+            aid = ad.get('id')
+            url = 'https://app.dewu.com/hacking-ad/v1/activity/receive'
+            _json = {"bizId": "tree", "aid": aid}
+            response = self.session.post(url, headers=self.headers, json=_json)
+            response_dict = response.json()
+            # print(response_dict)
+            print(f'获得{response_dict.get("data").get("award")}g水滴')
+            time.sleep(1)
+
     # 获取种树进度
     def get_tree_planting_progress(self):
         url = 'https://app.dewu.com/hacking-tree/v1/tree/get_tree_info'
@@ -741,6 +763,8 @@ class DeWu:
         self.droplet_invest()
         print(f'{character}开始点击8个商品获得水滴')
         self.click_product()
+        print(f'{character}开始领取品牌特惠奖励')
+        self.receive_brand_specials()
         print(f'{character}开始进行助力')
         self.help_user()
         print(f'{character}开始领取助力奖励')
@@ -752,6 +776,7 @@ class DeWu:
         print(f'剩余水滴：{self.get_droplet_number()}')
         time.sleep(1)
         self.get_tree_planting_progress()  # 获取种树进度
+
 
 
 # 主程序
