@@ -77,6 +77,8 @@ class DeWu:
             name = response_dict.get('data').get('name')
             level = response_dict.get('data').get('level')
             return name, level
+        print(response_dict.get('msg'))
+        return '', ''
 
     # 判断是否是团队树
     def determine_whether_is_team_tree(self):
@@ -441,7 +443,7 @@ class DeWu:
                 continue
 
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
-                             '去95分App逛潮奢尖货','参与1次拆盲盒']:
+                             '去95分App逛潮奢尖货', '参与1次拆盲盒']:
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
@@ -527,8 +529,7 @@ class DeWu:
             self.received_droplet_invest()
         else:
             print('今日已领取过水滴投资奖励了')
-        time.sleep(1)
-        url = 'https://app.dewu.com/hacking-tree/v1/invest/info'
+        time.sleep(2)
         response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         if response_dict.get('data').get('triggered') is True:  # 可投资
@@ -568,7 +569,7 @@ class DeWu:
             if keyword:
                 print(f'获取助力码成功 {keyword[0]}')
                 return keyword[0]
-        print('获取助力码失败！')
+        print(f'获取助力码失败！ {response_dict}')
 
     # 助力
     def help_user(self):
@@ -737,6 +738,8 @@ class DeWu:
     def main(self):
         character = '★★'
         name, level = self.tree_info()
+        if name == '' and level == '':
+            return
         print(f'目标：{name}')
         print(f'剩余水滴：{self.get_droplet_number()}')
         self.determine_whether_is_team_tree()  # 判断是否是团队树
