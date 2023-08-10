@@ -54,17 +54,14 @@ def get_url_key_value(url, key):
 class DeWu:
     WATERTING_G: int = 40  # 每次浇水克数
     REMAINING_G: int = 1800  # 最后浇水剩余不超过的克数
+    User_Agent = "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3"
 
-    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
+    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G, remaining_g=REMAINING_G, user_agent=User_Agent):
         self.index = index
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
-        self.headers = {
-            'SK': '',
-            'User-Agent': "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
-            'x-auth-token': x_auth_token
-        }
+        self.headers = {'SK': '', 'User-Agent': user_agent, 'x-auth-token': x_auth_token}
         self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
