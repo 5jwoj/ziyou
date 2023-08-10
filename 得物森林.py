@@ -443,7 +443,7 @@ class DeWu:
                 continue
 
             if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
-                             '去95分App逛潮奢尖货', '参与1次拆盲盒']:
+                             '去95分App逛潮奢尖货', '参与1次拆盲盒', '去.*?']:
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
@@ -651,17 +651,17 @@ class DeWu:
 
     # 领取空中水滴
     def receive_air_drop(self):
-        while True:
+        for _ in range(2):
             url = 'https://app.dewu.com/hacking-tree/v1/droplet/air_drop_receive'
             _json = {"clickCount": 20, "time": int(time.time())}
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             # print(response_dict)
-            if response_dict.get('data').get('isOk') is True:
+            if response_dict.get('data') and response_dict.get('data').get('isOk') is True:
                 print(f'获得{response_dict.get("data").get("droplet")}g水滴')
                 time.sleep(1)
                 continue
-            return
+            break
 
     # 点击8个商品获得水滴
     def click_product(self):
