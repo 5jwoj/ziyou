@@ -60,7 +60,11 @@ class DeWu:
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
-        self.headers = {'SK': '', 'x-auth-token': x_auth_token}
+        self.headers = {
+            'SK': '',
+            'User-Agent': "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3",
+            'x-auth-token': x_auth_token
+        }
         self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
@@ -490,13 +494,14 @@ class DeWu:
                     print(f'当前水滴不足以完成任务，跳过')
                     continue
                 for _ in range(count):
-                    if not self.waterting():  # 无法浇水时退出
-                        continue
                     time.sleep(0.5)
-                _json = {'taskId': tasks_dict['taskId'], 'taskType': str(tasks_dict['taskType'])}
-                if self.submit_task_completion_status(_json):
-                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
-                    continue
+                    if not self.waterting():  # 无法浇水时退出
+                        break
+                else:
+                    _json = {'taskId': tasks_dict['taskId'], 'taskType': str(tasks_dict['taskType'])}
+                    if self.submit_task_completion_status(_json):
+                        self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                        continue
 
             if any(re.match(pattern, task_name) for pattern in ['.*专场', '.*水滴大放送']):
                 if self.task_obtain(task_id, task_type):
