@@ -657,7 +657,8 @@ class DeWu:
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             # print(response_dict)
-            if response_dict.get('data') and response_dict.get('data').get('isOk') is True:
+            data = response_dict.get('data')
+            if data is not None and data.get('isOk') is True:
                 print(f'获得{response_dict.get("data").get("droplet")}g水滴')
                 time.sleep(1)
                 continue
