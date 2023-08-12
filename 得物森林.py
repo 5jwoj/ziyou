@@ -443,8 +443,8 @@ class DeWu:
                     self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
-            if task_name in ['去0元抽奖参与抽游戏皮肤', '参与1次上上签活动', '从桌面组件访问许愿树',
-                             '去95分App逛潮奢尖货', '参与1次拆盲盒', '去.*?']:
+            if any(re.match(pattern, task_name) for pattern in ['参与1次上上签活动', '从桌面组件访问许愿树',
+                                                                '参与1次拆盲盒', '去.*']):
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
