@@ -61,7 +61,7 @@ class DeWu:
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
-        self.headers = {'SK': '', 'User-Agent': user_agent, 'x-auth-token': x_auth_token}
+        self.headers = {'appVersion': '5.24.5', 'SK': '', 'User-Agent': user_agent, 'x-auth-token': x_auth_token}
         self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
@@ -213,7 +213,7 @@ class DeWu:
     # 获得当前水滴数
     def get_droplet_number(self):
         url = 'https://app.dewu.com/hacking-tree/v1/user/init'
-        _json = {'keyword': ''}
+        _json = {"keyword": ""}
         response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
