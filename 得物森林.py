@@ -406,6 +406,8 @@ class DeWu:
             task_name = tasks_dict.get('taskName')
             btd = get_url_key_value(tasks_dict.get('jumpUrl'), 'btd')
             btd = int(btd) if btd else btd  # 如果bid存在 转换为整数类型
+            spu_id = get_url_key_value(tasks_dict.get('jumpUrl'), 'spuId')
+            spu_id = int(spu_id) if spu_id else spu_id  # 如果spuId存在 转换为整数类型
 
             if tasks_dict.get('isComplete') is True:  # 可以直接领取奖励的
                 if task_name == '领40g水滴值' and not tasks_dict.get('receivable'):  # 如果该值不存在，说明已经领过40g水滴了
@@ -451,7 +453,7 @@ class DeWu:
                 continue
 
             if any(re.match(pattern, task_name) for pattern in ['.*收藏.*']):
-                _json = _json = {'taskId': task_id, 'taskType': str(task_type), 'btd': btd, 'spuId': 0}
+                _json = _json = {'taskId': task_id, 'taskType': str(task_type), 'btd': btd, 'spuId': spu_id}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
