@@ -10,6 +10,7 @@
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
 # 第一个账号助力作者，其余账号依ck顺序助力
+# https://t.me/q7q7q7q7q7q7q7_ziyou
 
 
 import os
