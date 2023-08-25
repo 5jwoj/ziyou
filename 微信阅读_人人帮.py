@@ -15,6 +15,7 @@
 # 选填 export push_token='****'
 # 一天运行一两次
 # 青龙拉库 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%AE%E4%BF%A1%E9%98%85%E8%AF%BB_%E4%BA%BA%E4%BA%BA%E5%B8%AE.py
+# https://t.me/q7q7q7q7q7q7q7_ziyou
 
 import sys
 import time
