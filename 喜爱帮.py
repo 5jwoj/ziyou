@@ -4,6 +4,7 @@
 # @Author  : ziyou
 # -------------------------------
 # 喜爱帮注册地址 https://m.xiaicn.cn/invite/768228
+# 每月至少3块钱
 # cron "27 7,12,23 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('喜爱帮')
 # 喜爱帮
