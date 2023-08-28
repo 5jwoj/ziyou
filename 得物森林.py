@@ -8,6 +8,7 @@
 # 抓包获取 x_auth_token
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
+# 如需关闭助力功能设置 export dewu_help_signal='False'
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
 # 第一个账号助力作者，其余账号依ck顺序助力
 # https://t.me/q7q7q7q7q7q7q7_ziyou
@@ -21,16 +22,26 @@ import time
 import requests
 from urllib.parse import urlparse, parse_qs
 
-X_AUTH_TOKEN = []
+X_AUTH_TOKEN_LIST = []
 SHARE_CODE_LIST = []
 AUTHOR_SHARE_CODE_LIST = []
+HELP_SIGNAL = 'True'
+
 
 # X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
 #                 'Bearer eyJhbGciOi*******', ]
 
-dewu_x_auth_token = os.getenv("dewu_x_auth_token")
-if dewu_x_auth_token:
-    X_AUTH_TOKEN += dewu_x_auth_token.replace("&", "\n").split("\n")
+# 加载环境变量
+def get_env():
+    global X_AUTH_TOKEN_LIST
+    global HELP_SIGNAL
+    env_str = os.getenv("dewu_x_auth_token")
+    if env_str:
+        X_AUTH_TOKEN_LIST += env_str.replace("&", "\n").split("\n")
+
+    env_str = os.getenv("dewu_help_signal")
+    if env_str:
+        HELP_SIGNAL = env_str
 
 
 # 下载作者的助力码
@@ -578,6 +589,9 @@ class DeWu:
 
     # 助力
     def help_user(self):
+        if HELP_SIGNAL == 'False':
+            print('助力功能已设置为关闭')
+            return
         url = 'https://app.dewu.com/hacking-tree/v1/user/init'
         if self.index == 0:
             for share_code in AUTHOR_SHARE_CODE_LIST:
@@ -801,11 +815,12 @@ def main(ck_list):
         if e:
             pass
     print(f'获取到{len(ck_list)}个账号！')
-    print('开始获取所有账号助力码')
-    for index, ck in enumerate(ck_list):
-        print(f'第{index + 1}个账号：', end='')
-        SHARE_CODE_LIST.append(DeWu(ck, index).get_share_code())
-        time.sleep(0.5)
+    if HELP_SIGNAL == 'True':
+        print('开始获取所有账号助力码')
+        for index, ck in enumerate(ck_list):
+            print(f'第{index + 1}个账号：', end='')
+            SHARE_CODE_LIST.append(DeWu(ck, index).get_share_code())
+            time.sleep(0.5)
     for index, ck in enumerate(ck_list):
         print(f'*****第{index + 1}个账号*****')
         DeWu(ck, index).main()
@@ -813,5 +828,6 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(X_AUTH_TOKEN)
+    get_env()
+    main(X_AUTH_TOKEN_LIST)
     sys.exit()
