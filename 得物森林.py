@@ -713,6 +713,9 @@ class DeWu:
         if response_dict.get('data') is None:
             print('当前没有可以完成的任务！')
             return
+        if response_dict.get('data').get('list') is None:
+            print('当前没有可以完成的任务！')
+            return
         ad_list = response_dict.get('data').get('list')
         for ad in ad_list:
             if ad.get('isReceived') is True:
