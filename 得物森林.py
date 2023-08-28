@@ -26,10 +26,20 @@ X_AUTH_TOKEN_LIST = []
 SHARE_CODE_LIST = []
 AUTHOR_SHARE_CODE_LIST = []
 HELP_SIGNAL = 'True'
+USER_AGENT_LIST = [
+    'Mozilla/5.0 (Linux; U; Android 10; zh-cn; M2007J3SC Build/QKQ1.200419.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/71.0.3578.141 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.3.14',
+    'Mozilla/5.0 (Linux; Android 8.0.0; HUAWEI NXT-AL10 Build/HUAWEINXT-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/11.21 SP-engine/2.17.0 baiduboxapp/11.21.3.10 (Baidu; P1 8.0.0)',
+    'Mozilla/5.0 (Linux; Android 9; HMA-AL00 Build/HUAWEIHMA-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 9) NABar/1.0',
+    'Mozilla/5.0 (Linux; Android 9; PAR-AL00 Build/HUAWEIPAR-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 9) NABar/1.0',
+    'Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429',
+    'Mozilla/5.0 (Linux; Android 10; DLT-A0 Build/DLTR2010300CN00MQ4; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.1 SP-engine/2.24.0 baiduboxapp/12.1.0.10 (Baidu; P1 10) NABar/1.0',
+    'Mozilla/5.0 (Linux; Android 10; TNY-AL00 Build/HUAWEITNY-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
+    'Mozilla/5.0 (Linux; Android 10; CLT-AL00 Build/HUAWEICLT-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
+    'Mozilla/5.0 (Linux; Android 8.1.0; vivo Y85 Build/OPM1.171019.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.3 SP-engine/2.25.0 baiduboxapp/12.3.0.11 (Baidu; P1 8.1.0) NABar/1.0',
+    'Mozilla/5.0 (Linux; Android 10; ELE-AL00 Build/HUAWEIELE-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
+    'Mozilla/5.0 (Linux; Android 10; TEL-AN00a Build/HONORTEL-AN00a; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
+]
 
-
-# X_AUTH_TOKEN = ['Bearer eyJhbGciOi*******',
-#                 'Bearer eyJhbGciOi*******', ]
 
 # 加载环境变量
 def get_env():
@@ -66,14 +76,16 @@ def get_url_key_value(url, key):
 class DeWu:
     WATERTING_G: int = 40  # 每次浇水克数
     REMAINING_G: int = 1800  # 最后浇水剩余不超过的克数
-    User_Agent = "Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3"
 
-    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G, remaining_g=REMAINING_G, user_agent=User_Agent):
+    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
         self.index = index
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
-        self.headers = {'appVersion': '5.24.5', 'SK': '', 'User-Agent': user_agent, 'x-auth-token': x_auth_token}
+        self.headers = {'appVersion': '5.24.5', 'User-Agent': random.choice(USER_AGENT_LIST),
+                        'x-auth-token': x_auth_token,
+                        'uuid': '0000000000000000',
+                        'SK': '0000PaKgdQl7NkcAs7GdSinDuORE3UC9wUZmVc6VV8AcBmydzs1uaMqtHH8fd3pIuiwsgwNeyZHMEKf0x5NL513B0M1v', }
         self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
