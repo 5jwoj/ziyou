@@ -8,6 +8,7 @@
 # 抓包获取 x_auth_token
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
+# export dewu_x_auth_sk='' 任意账号的sk
 # 如需关闭助力功能设置 export dewu_help_signal='False'
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
 # 第一个账号助力作者，其余账号依ck顺序助力
@@ -26,18 +27,19 @@ X_AUTH_TOKEN_LIST = []
 SHARE_CODE_LIST = []
 AUTHOR_SHARE_CODE_LIST = []
 HELP_SIGNAL = 'True'
+SK = ''
 USER_AGENT_LIST = [
-    'Mozilla/5.0 (Linux; U; Android 10; zh-cn; M2007J3SC Build/QKQ1.200419.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/71.0.3578.141 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.3.14',
-    'Mozilla/5.0 (Linux; Android 8.0.0; HUAWEI NXT-AL10 Build/HUAWEINXT-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/11.21 SP-engine/2.17.0 baiduboxapp/11.21.3.10 (Baidu; P1 8.0.0)',
-    'Mozilla/5.0 (Linux; Android 9; HMA-AL00 Build/HUAWEIHMA-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 9) NABar/1.0',
-    'Mozilla/5.0 (Linux; Android 9; PAR-AL00 Build/HUAWEIPAR-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 9) NABar/1.0',
-    'Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429',
-    'Mozilla/5.0 (Linux; Android 10; DLT-A0 Build/DLTR2010300CN00MQ4; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.1 SP-engine/2.24.0 baiduboxapp/12.1.0.10 (Baidu; P1 10) NABar/1.0',
-    'Mozilla/5.0 (Linux; Android 10; TNY-AL00 Build/HUAWEITNY-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
-    'Mozilla/5.0 (Linux; Android 10; CLT-AL00 Build/HUAWEICLT-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
-    'Mozilla/5.0 (Linux; Android 8.1.0; vivo Y85 Build/OPM1.171019.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.3 SP-engine/2.25.0 baiduboxapp/12.3.0.11 (Baidu; P1 8.1.0) NABar/1.0',
-    'Mozilla/5.0 (Linux; Android 10; ELE-AL00 Build/HUAWEIELE-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
-    'Mozilla/5.0 (Linux; Android 10; TEL-AN00a Build/HONORTEL-AN00a; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0',
+    'Mozilla/5.0 (Linux; U; Android 10; zh-cn; M2007J3SC Build/QKQ1.200419.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/71.0.3578.141 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.3.14 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 8.0.0; HUAWEI NXT-AL10 Build/HUAWEINXT-AL10; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/11.21 SP-engine/2.17.0 baiduboxapp/11.21.3.10 (Baidu; P1 8.0.0) Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 9; HMA-AL00 Build/HUAWEIHMA-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 9) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 9; PAR-AL00 Build/HUAWEIPAR-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 9) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 10; DLT-A0 Build/DLTR2010300CN00MQ4; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.1 SP-engine/2.24.0 baiduboxapp/12.1.0.10 (Baidu; P1 10) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 10; TNY-AL00 Build/HUAWEITNY-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 10; CLT-AL00 Build/HUAWEICLT-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 8.1.0; vivo Y85 Build/OPM1.171019.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.3 SP-engine/2.25.0 baiduboxapp/12.3.0.11 (Baidu; P1 8.1.0) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 10; ELE-AL00 Build/HUAWEIELE-AL00; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
+    'Mozilla/5.0 (Linux; Android 10; TEL-AN00a Build/HONORTEL-AN00a; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/76.0.3809.89 Mobile Safari/537.36 T7/12.4 SP-engine/2.25.0 baiduboxapp/12.4.0.11 (Baidu; P1 10) NABar/1.0 Mobile Safari/537.36/duapp/5.24.5(android;13)',
 ]
 
 
@@ -45,13 +47,16 @@ USER_AGENT_LIST = [
 def get_env():
     global X_AUTH_TOKEN_LIST
     global HELP_SIGNAL
+    global SK
     env_str = os.getenv("dewu_x_auth_token")
     if env_str:
         X_AUTH_TOKEN_LIST += env_str.replace("&", "\n").split("\n")
-
     env_str = os.getenv("dewu_help_signal")
     if env_str:
         HELP_SIGNAL = env_str
+    env_str = os.getenv("dewu_x_auth_sk")
+    if env_str:
+        SK = env_str
 
 
 # 下载作者的助力码
@@ -85,7 +90,7 @@ class DeWu:
         self.headers = {'appVersion': '5.24.5', 'User-Agent': random.choice(USER_AGENT_LIST),
                         'x-auth-token': x_auth_token,
                         'uuid': '0000000000000000',
-                        'SK': '0000PaKgdQl7NkcAs7GdSinDuORE3UC9wUZmVc6VV8AcBmydzs1uaMqtHH8fd3pIuiwsgwNeyZHMEKf0x5NL513B0M1v', }
+                        'SK': SK, }
         self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
@@ -820,6 +825,9 @@ class DeWu:
 def main(ck_list):
     if not ck_list:
         print('没有获取到账号！')
+        return
+    if not SK:
+        print('dewu_x_auth_sk未填写！')
         return
     try:
         download_author_share_code()
