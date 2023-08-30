@@ -30,6 +30,7 @@ AUTHOR_SHARE_CODE_LIST = []
 HELP_SIGNAL = 'True'
 SK = ''
 USER_AGENT = ''
+__version__ = '1.0.0'
 
 
 # 加载环境变量
