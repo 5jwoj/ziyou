@@ -241,8 +241,12 @@ class DeWu:
         response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
-        droplet_number = response_dict.get('data').get('droplet')
-        return droplet_number
+        data = response_dict.get('data')
+        if data:
+            droplet_number = data.get('droplet')
+            return droplet_number
+        print(f'获得当前水滴数出错 {response_dict}')
+        return '获取失败'
 
     # 领取累计任务奖励
     def receive_cumulative_tasks_reward(self, condition):
@@ -818,6 +822,7 @@ class DeWu:
 
 # 主程序
 def main(ck_list):
+    get_env()
     if not ck_list:
         print('没有获取到账号！')
         return
@@ -846,6 +851,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    get_env()
     main(X_AUTH_TOKEN_LIST)
     sys.exit()
