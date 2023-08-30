@@ -8,7 +8,7 @@
 # 抓包获取 x_auth_token
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
-# export dewu_x_auth_sk='' 任意账号的sk
+# export dewu_sk='' 任意一个账号的sk
 # 如需关闭助力功能设置 export dewu_help_signal='False'
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
 # 第一个账号助力作者，其余账号依ck顺序助力
@@ -54,7 +54,7 @@ def get_env():
     env_str = os.getenv("dewu_help_signal")
     if env_str:
         HELP_SIGNAL = env_str
-    env_str = os.getenv("dewu_x_auth_sk")
+    env_str = os.getenv("dewu_sk")
     if env_str:
         SK = env_str
 
@@ -827,7 +827,7 @@ def main(ck_list):
         print('没有获取到账号！')
         return
     if not SK:
-        print('dewu_x_auth_sk未填写！')
+        print('dewu_sk未填写！')
         return
     try:
         download_author_share_code()
