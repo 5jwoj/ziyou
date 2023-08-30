@@ -53,6 +53,24 @@ def get_env():
         USER_AGENT = env_str
 
 
+def get_version_from_github():
+    try:
+        username = "q7q7q7q7q7q7q7"
+        repo = "ziyou"
+        filepath = "得物森林.py"
+        url = f"https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            content = response.text
+            version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
+            version_match = re.search(version_regex, content, re.MULTILINE)
+            if version_match is not None and __version__:
+                print(f'现在运行的版本是：{__version__}，最新版本：{version_match.group(1)}')
+    except Exception as e:
+        if e:
+            pass
+
+
 # 下载作者的助力码
 def download_author_share_code():
     global AUTHOR_SHARE_CODE_LIST
@@ -838,6 +856,7 @@ def main(ck_list):
     except Exception as e:
         if e:
             pass
+    get_version_from_github()
     print(f'获取到{len(ck_list)}个账号！')
     if HELP_SIGNAL == 'True':
         print('开始获取所有账号助力码')
