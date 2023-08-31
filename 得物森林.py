@@ -10,6 +10,8 @@
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 # export dewu_sk='9MFyPaKgdQl*******************' 任意一个账号的 sk
 # export dewu_user_agent='*****pp/5.25.0******' 同一 sk 对应的 user_agent，其中需含有得物版本号
+# user_agent示例： Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429 Mobile Safari/537.36/duapp/5.24.5(android;13)
+# user_agent示例： DUApp/5.25.0 (com.siwuai.duapp; build:5.25.0.120; iOS 15.6.0) Alamofire/5.3.0
 # 如需关闭助力功能设置 export dewu_help_signal='False'
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
 # 第一个账号助力作者，其余账号依ck顺序助力
