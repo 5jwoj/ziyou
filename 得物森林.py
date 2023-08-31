@@ -62,7 +62,7 @@ def get_version_from_github():
     filepath = "得物森林.py"
     url = f"https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=(3, 3))
         if response.status_code == 200:
             response_text = response.text
             version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
