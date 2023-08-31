@@ -9,7 +9,7 @@
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 # export dewu_sk='9MFyPaKgdQl*******************' 任意一个账号的 sk
-# export dewu_user_agent='Mozilla/5.0 ***********' 同一 sk 对应的 user_agent
+# export dewu_user_agent='*****pp/5.25.0******' 同一 sk 对应的 user_agent，其中需含有得物版本号
 # 如需关闭助力功能设置 export dewu_help_signal='False'
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
 # 第一个账号助力作者，其余账号依ck顺序助力
@@ -30,7 +30,7 @@ AUTHOR_SHARE_CODE_LIST = []
 HELP_SIGNAL = 'True'
 SK = ''
 USER_AGENT = ''
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 
 # 加载环境变量
@@ -99,7 +99,7 @@ class DeWu:
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
-        app_version = re.findall(r'duapp/([0-9]+\.[0-9]+\.[0-9]+)', USER_AGENT)[0]
+        app_version = re.findall(r'pp/([0-9]+\.[0-9]+\.[0-9]+)', USER_AGENT)[0]
         self.headers = {'appVersion': app_version,
                         'User-Agent': USER_AGENT,
                         'x-auth-token': x_auth_token,
@@ -158,9 +158,10 @@ class DeWu:
 
     # 领取气泡水滴
     def receive_droplet_extra(self):
-        temporary_number = 0
+        temporary_number = -1  # 用于判断两次浇水，奖励是否有变化
         countdown_time = 0
-        while True:
+        receive_signal = False
+        for _ in range(50):
             url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/info'
             response = self.session.get(url, headers=self.headers)
             response_dict = response.json()
@@ -168,39 +169,42 @@ class DeWu:
             if response_dict.get('code') != 200:
                 print(f"获取气泡水滴信息失败! {response_dict}")
                 return
-            if response_dict.get('data').get('receivable') is True:  # 判断是否能领取
-                if response_dict.get('data').get('dailyExtra'):  # 第一次领取时
-                    water_droplet_number = response_dict.get('data').get('dailyExtra').get('totalDroplet')
+            data = response_dict.get('data')
+            receivable = data.get('receivable')
+            if receivable is True:  # 判断今天是否可领取
+                if data.get('dailyExtra'):  # 第一次领取时
+                    water_droplet_number = data.get('dailyExtra').get('totalDroplet')
                 else:  # 第二次领取时
-                    water_droplet_number = response_dict.get('data').get('onlineExtra').get('totalDroplet')
-                # 如果二者不相等，说明浇水成功 但奖励有变化 继续浇水
-                if temporary_number != water_droplet_number:  # 如果二者相等，说明浇水成功 但奖励没变化 不再浇水 直接领取
-                    temporary_number = water_droplet_number
-                    if water_droplet_number < 60:
-                        print(f'当前气泡水滴{water_droplet_number}g，未满，开始浇水')
-                        if self.waterting():  # 成功浇水 继续 否则 直接领取
-                            time.sleep(0.5)
-                            continue  # 浇水成功后查询信息
-                print(f"当前可领取气泡水滴{water_droplet_number}g")
-                url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/receive'
-                response = self.session.post(url, headers=self.headers)
-                response_dict = response.json()
-                # print(response_dict)
-                if response_dict.get('code') != 200:
-                    countdown_time += 60
-                    if countdown_time > 60:  # 已经等待过60s，任为领取成功，退出
-                        print(f"领取气泡水滴失败! {response_dict}")
-                        return
-                    print(f'等待{countdown_time}秒后领取')
-                    time.sleep(countdown_time)
+                    water_droplet_number = data.get('onlineExtra').get('totalDroplet')
+                # 如果二者相等，说明浇水成功 但奖励没变化 不再浇水 直接领取 或者 接受到直接领取信号
+                if temporary_number == water_droplet_number or receive_signal:
+                    print(f"当前可领取气泡水滴{water_droplet_number}g")
+                    url = 'https://app.dewu.com/hacking-tree/v1/droplet-extra/receive'
+                    response = self.session.post(url, headers=self.headers)
+                    response_dict = response.json()
+                    # print(response_dict)
+                    if response_dict.get('code') != 200:
+                        countdown_time += 60
+                        if countdown_time > 60:  # 已经等待过60s，仍未领取成功，退出
+                            print(f"领取气泡水滴失败! {response_dict}")
+                            return
+                        print(f'等待{countdown_time}秒后领取')
+                        time.sleep(countdown_time)
+                        continue
+                    print(f"领取气泡水滴成功! 获得{response_dict.get('data').get('totalDroplet')}g水滴")
+                    countdown_time = 0  # 领取成功，重置等待时间
                     continue
-                print(f"领取气泡水滴成功! 获得{response_dict.get('data').get('totalDroplet')}g水滴")
-                countdown_time = 0  # 领取成功，重置等待时间
-            else:  # 今天不可领取了，退出
-                water_droplet_number = response_dict.get('data').get('dailyExtra').get('totalDroplet')
-                print(f"{response_dict.get('data').get('dailyExtra').get('popTitle')},"
-                      f"已经积攒{water_droplet_number}g水滴!")
-                return
+                temporary_number = water_droplet_number
+                print(f'当前气泡水滴{water_droplet_number}g，未满，开始浇水')
+                if not self.waterting():  # 浇水失败
+                    receive_signal = True  # 给出直接领取信号
+                time.sleep(0.5)
+                continue  # 浇水成功后查询信息
+            # 今天不可领取了，退出
+            water_droplet_number = response_dict.get('data').get('dailyExtra').get('totalDroplet')
+            print(f"{response_dict.get('data').get('dailyExtra').get('popTitle')},"
+                  f"已经积攒{water_droplet_number}g水滴!")
+            return
 
     # 浇水充满气泡水滴
     def waterting_droplet_extra(self):
@@ -309,7 +313,7 @@ class DeWu:
 
     # 领取等级奖励
     def receive_level_reward(self):
-        while True:
+        for _ in range(20):
             url = 'https://app.dewu.com/hacking-tree/v1/tree/get_level_reward'
             _json = {'promote': ''}
             response = self.session.post(url, headers=self.headers, json=_json)
@@ -362,7 +366,7 @@ class DeWu:
 
     # 多次执行浇水，领取浇水奖励
     def execute_receive_watering_reward(self):
-        while True:
+        for _ in range(20):
             url = 'https://app.dewu.com/hacking-tree/v1/tree/get_tree_info'
             response = self.session.get(url, headers=self.headers)
             response_dict = response.json()
@@ -689,19 +693,20 @@ class DeWu:
         if response_dict.get('data') is None:
             return
         reward_list = response_dict.get('data', {}).get('list')
-        if reward_list:
-            for reward in reward_list:
-                # 如果任务完成但是未领取
-                if reward.get('isComplete') is True and reward.get('isReceive') is False:
-                    url = 'https://app.dewu.com/hacking-tree/v1/team/sign/receive'
-                    _json = {"teamTreeId": self.tree_id, "day": reward.get('day')}
-                    response = self.session.post(url, headers=self.headers, json=_json)
-                    response_dict = response.json()
-                    if response_dict.get('data').get('isOk') is True:
-                        print(f'获得{reward.get("num")}g水滴')
-                        continue
-                    print(f'领取合种上线奖励出现未知错误！ {response_dict}')
+        if not reward_list:
             return
+        for reward in reward_list:
+            # 如果任务完成但是未领取
+            if reward.get('isComplete') is True and reward.get('isReceive') is False:
+                url = 'https://app.dewu.com/hacking-tree/v1/team/sign/receive'
+                _json = {"teamTreeId": self.tree_id, "day": reward.get('day')}
+                response = self.session.post(url, headers=self.headers, json=_json)
+                response_dict = response.json()
+                if response_dict.get('data').get('isOk') is True:
+                    print(f'获得{reward.get("num")}g水滴')
+                    continue
+                print(f'领取合种上线奖励出现未知错误！ {response_dict}')
+        return
 
     # 领取空中水滴
     def receive_air_drop(self):
@@ -796,7 +801,7 @@ class DeWu:
     def main(self):
         character = '★★'
         name, level = self.tree_info()
-        if name == '' and level == '':
+        if not (name and level):
             return
         print(f'目标：{name}')
         print(f'剩余水滴：{self.get_droplet_number()}')
