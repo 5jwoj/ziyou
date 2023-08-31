@@ -49,10 +49,10 @@ def get_env():
         HELP_SIGNAL = env_str
     env_str = os.getenv("dewu_sk")
     if env_str:
-        SK = env_str
+        SK = env_str.strip()
     env_str = os.getenv("dewu_user_agent")
     if env_str:
-        USER_AGENT = env_str
+        USER_AGENT = env_str.strip()
 
 
 def get_version_from_github():
@@ -805,10 +805,12 @@ class DeWu:
     def main(self):
         character = '★★'
         name, level = self.tree_info()
-        if not (name and level):
+        droplet_number = self.get_droplet_number()
+        if not (name and level and droplet_number):
+            print("请求数据异常！")
             return
         print(f'目标：{name}')
-        print(f'剩余水滴：{self.get_droplet_number()}')
+        print(f'剩余水滴：{droplet_number}')
         self.determine_whether_is_team_tree()  # 判断是否是团队树
         self.get_tree_planting_progress()  # 获取种树进度
         print(f'{character}开始签到')
@@ -855,10 +857,14 @@ def main(ck_list):
         print('没有获取到账号！')
         return
     if not SK:
-        print('dewu_sk未填写！')
+        print('dewu_sk 未填写！')
         return
     if not USER_AGENT:
-        print('dewu_user_agent未填写！')
+        print('dewu_user_agent 未填写！')
+        return
+    _list = re.findall(r'pp/([0-9]+\.[0-9]+\.[0-9]+)', USER_AGENT)
+    if not _list:
+        print('dewu_user_agent 中无法匹配到得物app版本号，重新抓个试试吧')
         return
     try:
         download_author_share_code()
