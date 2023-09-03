@@ -60,7 +60,7 @@ def get_version_from_github():
     username = "q7q7q7q7q7q7q7"
     repo = "ziyou"
     filepath = "得物森林.py"
-    url = f"https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}"
+    url = f"https://ghproxy.com/https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}"
     try:
         response = requests.get(url, timeout=(3, 3))
         if response.status_code == 200:
