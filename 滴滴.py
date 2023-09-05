@@ -7,13 +7,14 @@
 # cron "0 8,10,13,14,15,17 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('滴滴')
 # 抓包获取 didi_jifen_token
-# 手机抓包后，在手机点击，福利中心的明细，查看一次福利金明细后，搜索token=，token=xxxx&city，xxx便是 didi_jifen_token。
-# 或者查看一次福利金明细后，查看URL，
-# https://rewards.xiaojukeji.com/loyalty_credit/bonus/getWelfareUsage4Wallet?，后面的token=xxxx&city，xxx便是 didi_jifen_token。
-# 主要功能：自动领取我的权益、福利金签到、瓜分福利金、领取完单返福利金...
+# 手机开启抓包后，点击福利金 查看福利金的明细后
+# 寻找 https://rewards.xiaojukeji.com/loyalty_credit/bonus/getWelfareUsage4Wallet
+# 链接里的token=xxxx&city，xxx便是 didi_jifen_token
+# 主要功能：自动领取我的权益、福利金签到、瓜分福利金、领取完单返福利金、领取每日优惠券...
 # 滴滴
 # export didi_jifen_token='9Op**__w==&9Op**__w==',多账号使用换行或&
 # 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E6%BB%B4%E6%BB%B4.py
+# https://t.me/q7q7q7q7q7q7q7_ziyou
 
 import datetime
 import os
