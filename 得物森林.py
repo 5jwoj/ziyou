@@ -26,7 +26,7 @@ import time
 import requests
 from urllib.parse import urlparse, parse_qs
 
-X_AUTH_TOKEN_LIST = []
+CK_LIST = []
 SHARE_CODE_LIST = []
 AUTHOR_SHARE_CODE_LIST = []
 HELP_SIGNAL = 'True'
@@ -37,13 +37,13 @@ __version__ = '1.0.1'
 
 # 加载环境变量
 def get_env():
-    global X_AUTH_TOKEN_LIST
+    global CK_LIST
     global HELP_SIGNAL
     global SK
     global USER_AGENT
     env_str = os.getenv("dewu_x_auth_token")
     if env_str:
-        X_AUTH_TOKEN_LIST += env_str.replace("&", "\n").split("\n")
+        CK_LIST += env_str.replace("&", "\n").split("\n")
     env_str = os.getenv("dewu_help_signal")
     if env_str:
         HELP_SIGNAL = env_str
@@ -60,18 +60,23 @@ def get_version_from_github():
     username = "q7q7q7q7q7q7q7"
     repo = "ziyou"
     filepath = "得物森林.py"
-    url = f"https://ghproxy.com/https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}"
-    try:
-        response = requests.get(url, timeout=(3, 3))
-        if response.status_code == 200:
-            response_text = response.text
-            version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
-            version_match = re.search(version_regex, response_text, re.MULTILINE)
-            if version_match is not None and __version__:
-                latest_version = version_match.group(1)
-    except Exception as e:
-        if e:
-            pass
+    url_list = [
+        f'https://raw.fgit.cf/{username}/{repo}/main/{filepath}',
+        f"https://ghproxy.com/https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}",
+    ]
+    for url in url_list:
+        try:
+            response = requests.get(url, timeout=(3, 3))
+            if response.status_code == 200:
+                response_text = response.text
+                version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
+                version_match = re.search(version_regex, response_text, re.MULTILINE)
+                if version_match is not None and __version__:
+                    latest_version = version_match.group(1)
+                    break
+        except Exception as e:
+            if e:
+                pass
     print(f'现在运行的版本是：{__version__}，最新版本：{latest_version}')
 
 
@@ -886,5 +891,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(X_AUTH_TOKEN_LIST)
+    main(CK_LIST)
     sys.exit()
