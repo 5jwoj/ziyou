@@ -43,18 +43,23 @@ def get_version_from_github():
     username = "q7q7q7q7q7q7q7"
     repo = "ziyou"
     filepath = "滴滴.py"
-    url = f"https://ghproxy.com/https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}"
-    try:
-        response = requests.get(url, timeout=(3, 3))
-        if response.status_code == 200:
-            response_text = response.text
-            version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
-            version_match = re.search(version_regex, response_text, re.MULTILINE)
-            if version_match is not None and __version__:
-                latest_version = version_match.group(1)
-    except Exception as e:
-        if e:
-            pass
+    url_list = [
+        f'https://raw.fgit.cf/{username}/{repo}/main/{filepath}',
+        f"https://ghproxy.com/https://raw.githubusercontent.com/{username}/{repo}/main/{filepath}",
+    ]
+    for url in url_list:
+        try:
+            response = requests.get(url, timeout=(3, 3))
+            if response.status_code == 200:
+                response_text = response.text
+                version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
+                version_match = re.search(version_regex, response_text, re.MULTILINE)
+                if version_match is not None and __version__:
+                    latest_version = version_match.group(1)
+                    break
+        except Exception as e:
+            if e:
+                pass
     print(f'现在运行的版本是：{__version__}，最新版本：{latest_version}')
 
 
