@@ -852,6 +852,7 @@ class DeWu:
 
 # 主程序
 def main(ck_list):
+    get_version_from_github()
     get_env()
     if not ck_list:
         print('没有获取到账号！')
@@ -871,7 +872,6 @@ def main(ck_list):
     except Exception as e:
         if e:
             pass
-    get_version_from_github()
     print(f'获取到{len(ck_list)}个账号！')
     if HELP_SIGNAL == 'True':
         print('开始获取所有账号助力码')
