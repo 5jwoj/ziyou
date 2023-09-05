@@ -539,10 +539,10 @@ class DiDi:
         self.receive_wyc_order_finish()
         print(f'{character}开始天天领神券签到')
         self.claim_coupon_check_in()
-        print(f'{character}开始天天领神券抽奖')
-        self.claim_coupon_lottery()
         print(f'{character}开始领取每日精选活动券')
         self.today_pick()
+        print(f'{character}开始天天领神券抽奖')
+        self.claim_coupon_lottery()
         print(f'{character}当前福利金数量为：{self.get_info()}')
 
 
