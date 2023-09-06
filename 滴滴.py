@@ -515,7 +515,7 @@ class DiDi:
                         }
                         response = requests.post(url=url, headers=headers, json=_json)
                         response_dict = response.json()
-                        print(response_dict)
+                        # print(response_dict)
                         if response_dict.get('errno') == 0:
                             # name = response_dict.get('data').get('name')
                             print(f'领取成功')
