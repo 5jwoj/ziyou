@@ -678,7 +678,10 @@ class DeWu:
                 _json = {'keyword': share_code}
                 response = self.session.post(url, headers=self.headers, json=_json)
                 response_dict = response.json()
-                invite_res = response_dict.get('data').get('inviteRes')
+                data = response_dict.get('data')
+                if not data:
+                    continue
+                invite_res = data.get('inviteRes')
                 if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                     myprint(f'开始助力 {share_code}', end=' ')
                     myprint(invite_res)
@@ -690,7 +693,11 @@ class DeWu:
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             # myprint(response_dict)
-            invite_res = response_dict.get('data').get('inviteRes')
+            data = response_dict.get('data')
+            if not data:
+                print(f'助力异常 {response_dict}')
+                continue
+            invite_res = data.get('inviteRes')
             myprint(invite_res)
             if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
                 return
