@@ -23,7 +23,7 @@ import sys
 import time
 import requests
 
-CK_LIST = []
+ck_list = []
 
 MONTH_SIGNAL = False  # 默认关闭月月领券
 
@@ -32,10 +32,10 @@ __version__ = '1.0.0'
 
 # 加载环境变量
 def get_env():
-    global CK_LIST
+    global ck_list
     env_str = os.getenv("didi_jifen_token")
     if env_str:
-        CK_LIST += env_str.replace("&", "\n").split("\n")
+        ck_list += env_str.replace("&", "\n").split("\n")
 
 
 def get_version_from_github():
@@ -53,7 +53,8 @@ def get_version_from_github():
             if response.status_code == 200:
                 response_text = response.text
                 version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
-                version_match = re.search(version_regex, response_text, re.MULTILINE)
+                version_match = re.search(version_regex, response_text,
+                                          re.MULTILINE)
                 if version_match is not None and __version__:
                     latest_version = version_match.group(1)
                     break
@@ -73,9 +74,11 @@ class DiDi:
         self.city_id = city_id
         self.lat = lat
         self.lng = lng
-        self.today = datetime.datetime.now().strftime('%Y-%m-%d')  # 今天时间 例如：'2023-07-12'
+        self.today = datetime.datetime.now().strftime(
+            '%Y-%m-%d')  # 今天时间 例如：'2023-07-12'
         # 明天时间 例如：'2023-07-13'
-        self.tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+        self.tomorrow = (datetime.datetime.now() + datetime.timedelta(
+            days=1)).strftime('%Y-%m-%d')
         self.activity_id_today = 0  # 今天的瓜分福利金的活动id 用于完成今天的瓜分福利金 需在14点之前
         self.task_id_today = 0  # 完成今天的瓜分福利金的任务id 用于完成今天的瓜分福利金 需在14点之前
         self.status_today = 0  # 显示今天的瓜分活动状态 1为待报名 2为已参加 3为已完成待发奖 4为已发奖 5为未参加
@@ -95,7 +98,8 @@ class DiDi:
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('errno') == 0:
-            subsidy_amount = response_dict['data']['subsidy_state']['subsidy_amount']
+            subsidy_amount = response_dict['data']['subsidy_state'][
+                'subsidy_amount']
             print(f"今日签到成功，获得{subsidy_amount}福利金")
             return
         if response_dict.get('errno') == 40009:
@@ -118,13 +122,15 @@ class DiDi:
 
         today_data = divide_data[self.today]
         # print(today_data)
-        self.activity_id_today, self.task_id_today, self.status_today = today_data['activity_id'], today_data[
-            'task_id'], today_data['status']
+        self.activity_id_today, self.task_id_today, self.status_today = \
+            today_data['activity_id'], today_data[
+                'task_id'], today_data['status']
 
         tomorrow_data = divide_data[self.tomorrow]
         # print(tomorrow_data)
-        self.activity_id_tomorrow, self.status_tomorrow, self.count_tomorrow = tomorrow_data['activity_id'], \
-            tomorrow_data['status'], tomorrow_data['button']['count']
+        self.activity_id_tomorrow, self.status_tomorrow, self.count_tomorrow = \
+            tomorrow_data['activity_id'], \
+                tomorrow_data['status'], tomorrow_data['button']['count']
         return True
 
     # 报名明天的瓜分福利金
@@ -184,14 +190,16 @@ class DiDi:
         response = requests.get(url=url, params=params)
         response_dict = response.json()
         # print(response_dict)
-        privileges_list = response_dict.get('data', {}).get('privileges', [])  # 我的权益列表
+        privileges_list = response_dict.get('data', {}).get('privileges',
+                                                            [])  # 我的权益列表
         return privileges_list
 
     # 领取 周周领券 活动的优惠券
     def receive_level_gift_week(self):
         privileges_list = self.inquire_benefits_details()
         for privileges in privileges_list:
-            if privileges.get('name') not in ['周周领券'] or privileges.get('level_gift') is None:
+            if privileges.get('name') not in ['周周领券'] or privileges.get(
+                    'level_gift') is None:
                 continue
             coupons_list = privileges.get('level_gift', {}).get('coupons', [])
             for coupons in coupons_list:
@@ -200,7 +208,8 @@ class DiDi:
                     continue
                 batch_id = coupons.get('batch_id')
                 # print(batch_id)
-                print(f"开始领取 {coupons.get('remark')}{coupons.get('coupon_title')}")
+                print(
+                    f"开始领取 {coupons.get('remark')}{coupons.get('coupon_title')}")
                 url = f"https://member.xiaojukeji.com/dmember/h5/receiveLevelGift?xbiz=&prod_key=wyc-vip-level&xpsid=&dchn=&xoid=&xenv=passenger&xspm_from=&xpsid_root=&xpsid_from=&xpsid_share=&token={self.token}&batch_id={batch_id}&env={{}}&gift_type=1&city_id={self.city_id}"
                 time.sleep(0.5)
                 response = requests.get(url=url)
@@ -218,7 +227,8 @@ class DiDi:
             return
         privileges_list = self.inquire_benefits_details()
         for privileges in privileges_list:
-            if privileges.get('name') not in ['月月领券'] or privileges.get('level_gift') is None:
+            if privileges.get('name') not in ['月月领券'] or privileges.get(
+                    'level_gift') is None:
                 continue
             coupons_list = privileges.get('level_gift', {}).get('coupons', [])
             for coupons in coupons_list:
@@ -227,7 +237,8 @@ class DiDi:
                     continue
                 batch_id = coupons.get('batch_id')
                 # print(batch_id)
-                print(f"开始领取 {coupons.get('remark')}{coupons.get('coupon_title')}")
+                print(
+                    f"开始领取 {coupons.get('remark')}{coupons.get('coupon_title')}")
                 url = f"https://member.xiaojukeji.com/dmember/h5/receiveLevelGift?xbiz=&prod_key=wyc-vip-level&xpsid=&dchn=&xoid=&xenv=passenger&xspm_from=&xpsid_root=&xpsid_from=&xpsid_share=&token={self.token}&batch_id={batch_id}&env={{}}&gift_type=1&city_id={self.city_id}"
                 time.sleep(0.5)
                 response = requests.get(url=url)
@@ -245,12 +256,15 @@ class DiDi:
             if privileges.get('name') in ['周周领券', '月月领券']:
                 if privileges.get('level_gift') is None:
                     continue
-                coupons_list = privileges.get('level_gift', {}).get('coupons', [])
+                coupons_list = privileges.get('level_gift', {}).get('coupons',
+                                                                    [])
                 for coupons in coupons_list:  # 膨胀
-                    swell_status = coupons.get('swell_status')  # 0代表不能膨胀，1代表能膨胀,2代表已膨胀
+                    swell_status = coupons.get(
+                        'swell_status')  # 0代表不能膨胀，1代表能膨胀,2代表已膨胀
                     # print(swell_status)
                     if swell_status == 1:
-                        print(f"开始膨胀 {coupons.get('remark')}{coupons.get('coupon_title')}")
+                        print(
+                            f"开始膨胀 {coupons.get('remark')}{coupons.get('coupon_title')}")
                         batch_id = coupons.get('batch_id')
                         coupon_id = coupons.get('coupon_id')
                         url = f'https://member.xiaojukeji.com/dmember/h5/swell_coupon?city_id={self.city_id}'
@@ -263,7 +277,8 @@ class DiDi:
                         response_dict = response.json()
                         # print(response_dict)
                         if response_dict.get('error') == 0:
-                            if response_dict.get('data', {}).get('is_swell') is True:
+                            if response_dict.get('data', {}).get(
+                                    'is_swell') is True:
                                 print('膨胀成功！')
                                 continue
                             print('膨胀失败！')
@@ -346,7 +361,8 @@ class DiDi:
                          "lng": self.lng,
                          "platform": "na",
                          "env": "{}",
-                         "cycle_id": cycle_id, "bubble_type": "wyc_order_finish"}
+                         "cycle_id": cycle_id,
+                         "bubble_type": "wyc_order_finish"}
                 time.sleep(0.5)
                 response = requests.post(url=url, json=_json)
                 response_dict = response.json()
@@ -377,14 +393,17 @@ class DiDi:
         headers = {'Didi-Ticket': self.token}
         _json = {"dchn": "dKlklLa",
                  "args": {"runtime_args": {"token": self.token,
-                                           "lat": self.lat, "lng": self.lng, "env": {},
+                                           "lat": self.lat, "lng": self.lng,
+                                           "env": {},
                                            "platform": "na",
                                            "Didi-Ticket": self.token, }}, }
         response = requests.post(url=url, headers=headers, json=_json)
         response_dict = response.json()
         # print(response_dict)
-        lottery_chance = response_dict.get('data').get('conf').get('strategy_data').get('data').get('lottery_chance')
-        act_id = response_dict.get('data').get('conf').get('ext').get('act_conf').get('act_id')
+        lottery_chance = response_dict.get('data').get('conf').get(
+            'strategy_data').get('data').get('lottery_chance')
+        act_id = response_dict.get('data').get('conf').get('ext').get(
+            'act_conf').get('act_id')
         # print(lottery_chance, act_id)
         # print(f'当前抽奖次数为：{lottery_chance}')
         for _ in range(lottery_chance):
@@ -395,7 +414,8 @@ class DiDi:
             response_dict = response.json()
             # print(response_dict)
             if response_dict.get('errno') == 0:
-                print(f'抽奖成功！获得{response_dict.get("data").get("prize_data")[0].get("name")}')
+                print(
+                    f'抽奖成功！获得{response_dict.get("data").get("prize_data")[0].get("name")}')
                 time.sleep(5)
                 continue
             print(f'抽奖失败！{response_dict.get("errmsg")}')
@@ -428,13 +448,15 @@ class DiDi:
                  "args": [
                      {"dchn": "kkXgpzO", "prod_key": "ut-limited-seckill",
                       "runtime_args": {"token": self.token,
-                                       "lat": self.lat, "lng": self.lng, "env": {},
+                                       "lat": self.lat, "lng": self.lng,
+                                       "env": {},
                                        "Didi-Ticket": self.token, }
                       },
-                     {"dchn": "gL3E8qZ", "prod_key": "ut-support-coupon", "runtime_args": {"token": self.token,
-                                                                                           "lat": self.lat,
-                                                                                           "lng": self.lng, "env": {},
-                                                                                           "Didi-Ticket": self.token, }
+                     {"dchn": "gL3E8qZ", "prod_key": "ut-support-coupon",
+                      "runtime_args": {"token": self.token,
+                                       "lat": self.lat,
+                                       "lng": self.lng, "env": {},
+                                       "Didi-Ticket": self.token, }
                       }
                  ]}
         response = requests.post(url=url, headers=headers, json=_json)
@@ -443,21 +465,74 @@ class DiDi:
         activity_list = response_dict.get('data').get('conf')
         # print(activity_list)
         for activity in activity_list:
+            if activity.get('dchn') == 'gL3E8qZ':
+                print('★开始领取每日精选')
+                coupons_list = activity.get('strategy_data').get('data').get(
+                    'daily_coupon').get('coupons')
+                coupons_status_name_dict = {'1': '可领取', '2': '已经领取',
+                                            '4': '已抢光',
+                                            '6': '待前置条件完成'}
+                for coupon_index, coupon in enumerate(coupons_list):
+                    coupons_name = coupon.get('name')
+                    coupons_status = coupon.get('status')  # 1为可领取 2为已经领取 4为抽奖抢券
+                    print(f'{coupon_index + 1}.券名：{coupons_name} '
+                          f'状态：{coupons_status_name_dict[str(coupons_status)]}')
+                    if coupons_status == 1:
+                        print('开始领取')
+                        activity_id = coupon.get('activity_id')
+
+                        if coupons_name == '打车5元券':
+                            print('该券为分享助力才能领券，不支持自动领取')
+                            continue
+                        if activity_id == '10010':
+                            print(
+                                '该券为明天在目的地栏搜“领券”必得1张快车优惠券，不支持自动领取')
+                            continue
+
+                        group_id = coupon.get('group_id')
+                        coupon_conf_id = coupon.get('coupon_conf_id')
+                        group_date = coupon.get('group_date')
+                        url = 'https://ut.xiaojukeji.com/ut/janitor/api/action/coupon/bind'
+                        headers = {'Didi-Ticket': self.token}
+                        _json = {
+                            'group_date': group_date,
+                            "activity_id": activity_id,
+                            "group_id": group_id,
+                            "coupon_conf_id": coupon_conf_id,
+                        }
+                        response = requests.post(
+                            url=url, headers=headers, json=_json)
+                        response_dict = response.json()
+                        # print(response_dict)
+                        if response_dict.get('errno') == 0:
+                            # name = response_dict.get('data').get('name')
+                            print(f'领取成功')
+                            time.sleep(0.5)
+                            continue
+                        print(f'领取失败 {response_dict}')
+                        return
+
             if activity.get('dchn') == 'kkXgpzO':
                 print('★开始领取限时抢')
-                seckill_list = activity.get('strategy_data').get('data').get('seckill')  # 秒杀列表
-                seckill_status_name_dict = {'1': '正在热抢', '2': '即将开始', '3': '已经开抢'}
-                coupons_status_name_dict = {'1': '可领取', '2': '已经领取', '4': '抽奖抢券', '5': '未到时间'}
+                seckill_list = activity.get('strategy_data').get('data').get(
+                    'seckill')  # 秒杀列表
+                seckill_status_name_dict = {'1': '正在热抢', '2': '即将开始',
+                                            '3': '已经开抢'}
+                coupons_status_name_dict = {'1': '可领取', '2': '已经领取',
+                                            '4': '抽奖抢券', '5': '未到时间'}
 
                 for seckill in seckill_list:
                     seckill_name = seckill.get('start_at')
-                    seckill_status = int(seckill.get('status'))  # 1为正在热抢 2为即将开始 3为已经开抢
-                    print(f'☆☆场次：{seckill_name} 状态：{seckill_status_name_dict[str(seckill_status)]}')
+                    seckill_status = int(
+                        seckill.get('status'))  # 1为正在热抢 2为即将开始 3为已经开抢
+                    print(
+                        f'☆☆场次：{seckill_name} 状态：{seckill_status_name_dict[str(seckill_status)]}')
                     if seckill_status in [1, 3]:
                         coupons_list = seckill.get('coupons')
                         for coupon_index, coupon in enumerate(coupons_list):
                             coupons_name = coupon.get('name')
-                            coupons_status = coupon.get('status')  # 1为可领取 2为已经领取 4为抽奖抢券
+                            coupons_status = coupon.get(
+                                'status')  # 1为可领取 2为已经领取 4为抽奖抢券
                             print(f'{coupon_index + 1}.券名：{coupons_name} '
                                   f'状态：{coupons_status_name_dict[str(coupons_status)]}')
                             if coupons_status == 1:
@@ -472,7 +547,9 @@ class DiDi:
                                          "group_id": group_id,
                                          'group_date': group_date,
                                          "coupon_conf_id": coupon_conf_id, }
-                                response = requests.post(url=url, headers=headers, json=_json)
+                                response = requests.post(url=url,
+                                                         headers=headers,
+                                                         json=_json)
                                 response_dict = response.json()
                                 # print(response_dict)
                                 if response_dict.get('errno') == 0:
@@ -482,51 +559,11 @@ class DiDi:
                                     continue
                                 print(f'领取失败 {response_dict}')
 
-            if activity.get('dchn') == 'gL3E8qZ':
-                print('★开始领取每日精选')
-                coupons_list = activity.get('strategy_data').get('data').get('daily_coupon').get('coupons')
-                coupons_status_name_dict = {'1': '可领取', '2': '已经领取', '4': '已抢光', '6': '待前置条件完成'}
-                for coupon_index, coupon in enumerate(coupons_list):
-                    coupons_name = coupon.get('name')
-                    coupons_status = coupon.get('status')  # 1为可领取 2为已经领取 4为抽奖抢券
-                    print(f'{coupon_index + 1}.券名：{coupons_name} '
-                          f'状态：{coupons_status_name_dict[str(coupons_status)]}')
-                    if coupons_status == 1:
-                        print('开始领取')
-                        activity_id = coupon.get('activity_id')
-
-                        if coupons_name == '打车5元券':
-                            print('该券为分享助力才能领券，不支持自动领取')
-                            continue
-                        if activity_id == '10010':
-                            print('该券为明天在目的地栏搜“领券”必得1张快车优惠券，不支持自动领取')
-                            continue
-
-                        group_id = coupon.get('group_id')
-                        coupon_conf_id = coupon.get('coupon_conf_id')
-                        group_date = coupon.get('group_date')
-                        url = 'https://ut.xiaojukeji.com/ut/janitor/api/action/coupon/bind'
-                        headers = {'Didi-Ticket': self.token}
-                        _json = {
-                            'group_date': group_date,
-                            "activity_id": activity_id,
-                            "group_id": group_id,
-                            "coupon_conf_id": coupon_conf_id,
-                        }
-                        response = requests.post(url=url, headers=headers, json=_json)
-                        response_dict = response.json()
-                        # print(response_dict)
-                        if response_dict.get('errno') == 0:
-                            # name = response_dict.get('data').get('name')
-                            print(f'领取成功')
-                            time.sleep(0.5)
-                            continue
-                        print(f'领取失败 {response_dict}')
-                        return
-
     def main(self):
         character = '★★'
         print(f'{character}当前福利金数量为：{self.get_info()}')
+        print(f'{character}开始领取每日精选活动券')
+        self.today_pick()
         print(f'{character}开始进行福利金签到')
         self.check_in()
         print(f'{character}开始进行瓜瓜乐瓜分福利金')
@@ -545,8 +582,6 @@ class DiDi:
         self.receive_wyc_order_finish()
         print(f'{character}开始天天领神券签到')
         self.claim_coupon_check_in()
-        print(f'{character}开始领取每日精选活动券')
-        self.today_pick()
         print(f'{character}开始天天领神券抽奖')
         self.claim_coupon_lottery()
         print(f'{character}当前福利金数量为：{self.get_info()}')
@@ -567,5 +602,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(CK_LIST)
+    main(ck_list)
     sys.exit()
