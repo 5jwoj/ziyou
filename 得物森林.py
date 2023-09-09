@@ -26,9 +26,9 @@ import time
 import requests
 from urllib.parse import urlparse, parse_qs
 
-CK_LIST = []
-SHARE_CODE_LIST = []
-AUTHOR_SHARE_CODE_LIST = []
+ck_list = []
+share_code_list = []
+author_share_code_list = []
 HELP_SIGNAL = 'True'
 SK = ''
 USER_AGENT = ''
@@ -65,13 +65,13 @@ def send_notification_message(title):
 
 # 加载环境变量
 def get_env():
-    global CK_LIST
+    global ck_list
     global HELP_SIGNAL
     global SK
     global USER_AGENT
     env_str = os.getenv("dewu_x_auth_token")
     if env_str:
-        CK_LIST += env_str.replace("&", "\n").split("\n")
+        ck_list += env_str.replace("&", "\n").split("\n")
     env_str = os.getenv("dewu_help_signal")
     if env_str:
         HELP_SIGNAL = env_str
@@ -98,25 +98,27 @@ def get_version_from_github():
             if response.status_code == 200:
                 response_text = response.text
                 version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
-                version_match = re.search(version_regex, response_text, re.MULTILINE)
+                version_match = re.search(version_regex, response_text,
+                                          re.MULTILINE)
                 if version_match is not None and __version__:
                     latest_version = version_match.group(1)
                     break
         except Exception as e:
             if e:
                 pass
-    myprint(f'现在运行的版本是：{__version__}，最新版本：{latest_version}', flush=True)
+    myprint(f'现在运行的版本是：{__version__}，最新版本：{latest_version}',
+            flush=True)
 
 
 # 下载作者的助力码
 def download_author_share_code():
-    global AUTHOR_SHARE_CODE_LIST
+    global author_share_code_list
     try:
         response = requests.get('https://netcut.cn/p/d3436822ba03c0c3')
         _list = re.findall(r'"note_content":"(.*?)"', response.text)
         if _list:
             share_code_list = _list[0].split(r'\n')
-            AUTHOR_SHARE_CODE_LIST += share_code_list
+            author_share_code_list += share_code_list
     except Exception as e:
         if e:
             pass
@@ -135,7 +137,8 @@ class DeWu:
     WATERTING_G: int = 40  # 每次浇水克数
     REMAINING_G: int = 1800  # 最后浇水剩余不超过的克数
 
-    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G, remaining_g=REMAINING_G):
+    def __init__(self, x_auth_token, index, waterting_g=WATERTING_G,
+                 remaining_g=REMAINING_G):
         self.index = index
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
@@ -171,7 +174,8 @@ class DeWu:
         response = self.session.get(url, headers=self.headers)
         response_dict = response.json()
         # myprint(response_dict)
-        if response_dict.get('data').get('show') is True and response_dict.get('data').get('teamTreeId'):
+        if response_dict.get('data').get('show') is True and response_dict.get(
+                'data').get('teamTreeId'):
             self.is_team_tree = True
 
     # 领潮金币签到
@@ -214,9 +218,11 @@ class DeWu:
             receivable = data.get('receivable')
             if receivable is True:  # 判断今天是否可领取
                 if data.get('dailyExtra'):  # 第一次领取时
-                    water_droplet_number = data.get('dailyExtra').get('totalDroplet')
+                    water_droplet_number = data.get('dailyExtra').get(
+                        'totalDroplet')
                 else:  # 第二次领取时
-                    water_droplet_number = data.get('onlineExtra').get('totalDroplet')
+                    water_droplet_number = data.get('onlineExtra').get(
+                        'totalDroplet')
                 # 如果二者相等，说明浇水成功 但奖励没变化 不再浇水 直接领取 或者 接受到直接领取信号
                 if temporary_number == water_droplet_number or receive_signal:
                     myprint(f"当前可领取气泡水滴{water_droplet_number}g")
@@ -232,7 +238,8 @@ class DeWu:
                         myprint(f'等待{countdown_time}秒后领取')
                         time.sleep(countdown_time)
                         continue
-                    myprint(f"领取气泡水滴成功! 获得{response_dict.get('data').get('totalDroplet')}g水滴")
+                    myprint(
+                        f"领取气泡水滴成功! 获得{response_dict.get('data').get('totalDroplet')}g水滴")
                     countdown_time = 0  # 领取成功，重置等待时间
                     continue
                 temporary_number = water_droplet_number
@@ -242,9 +249,11 @@ class DeWu:
                 time.sleep(0.5)
                 continue  # 浇水成功后查询信息
             # 今天不可领取了，退出
-            water_droplet_number = response_dict.get('data').get('dailyExtra').get('totalDroplet')
-            myprint(f"{response_dict.get('data').get('dailyExtra').get('popTitle')},"
-                    f"已经积攒{water_droplet_number}g水滴!")
+            water_droplet_number = response_dict.get('data').get(
+                'dailyExtra').get('totalDroplet')
+            myprint(
+                f"{response_dict.get('data').get('dailyExtra').get('popTitle')},"
+                f"已经积攒{water_droplet_number}g水滴!")
             return
 
     # 浇水充满气泡水滴
@@ -256,7 +265,8 @@ class DeWu:
             # myprint(response_dict)
             count = response_dict.get('data').get('dailyExtra').get('times')
             if not count:
-                myprint(f"气泡水滴已充满，明日可领取{response_dict.get('data').get('dailyExtra').get('totalDroplet')}g")
+                myprint(
+                    f"气泡水滴已充满，明日可领取{response_dict.get('data').get('dailyExtra').get('totalDroplet')}g")
                 return
             for _ in range(count):
                 if not self.waterting():  # 无法浇水时退出
@@ -272,7 +282,8 @@ class DeWu:
         if response_dict.get('code') != 200:
             myprint(f"领取木桶水滴失败! {response_dict}")
             return
-        myprint(f"领取木桶水滴成功! 获得{response_dict.get('data').get('droplet')}g水滴")
+        myprint(
+            f"领取木桶水滴成功! 获得{response_dict.get('data').get('droplet')}g水滴")
 
     # 判断木桶水滴是否可以领取
     def judging_bucket_droplet(self):
@@ -281,7 +292,8 @@ class DeWu:
         response_dict = response.json()
         # myprint(response_dict)
         if response_dict.get('data').get('currentDroplet') == 100:
-            myprint(f"今天已领取木桶水滴{response_dict.get('data').get('getTimes')}次")
+            myprint(
+                f"今天已领取木桶水滴{response_dict.get('data').get('getTimes')}次")
             self.receive_bucket_droplet()
             return True
         return False
@@ -295,7 +307,8 @@ class DeWu:
         if response_dict.get('code') != 200:
             myprint(f"获取助力码失败! {response_dict}")
             return
-        keyword_desc = response_dict.get('data').get('keywordDesc').replace('\n', '')
+        keyword_desc = response_dict.get('data').get('keywordDesc').replace(
+            '\n', '')
         myprint(f"获取助力码成功! {keyword_desc}")
 
     # 获得当前水滴数
@@ -322,7 +335,8 @@ class DeWu:
         if response_dict.get('code') != 200:
             myprint(f"领取累计任务奖励失败! {response_dict}")
             return
-        myprint(f"领取累计任务奖励成功! 获得{response_dict.get('data').get('num')}g水滴")
+        myprint(
+            f"领取累计任务奖励成功! 获得{response_dict.get('data').get('num')}g水滴")
 
     # 领取任务奖励
     def receive_task_reward(self, classify, task_id, task_type):
@@ -338,7 +352,8 @@ class DeWu:
         if response_dict.get('code') != 200:
             myprint(f"领取任务奖励失败! {response_dict}")
             return
-        myprint(f"领取任务奖励成功! 获得{response_dict.get('data').get('num')}g水滴")
+        myprint(
+            f"领取任务奖励成功! 获得{response_dict.get('data').get('num')}g水滴")
 
     # 领取浇水奖励
     def receive_watering_reward(self):
@@ -350,7 +365,8 @@ class DeWu:
         if response_dict.get('code') != 200:
             myprint(f"领取浇水奖励失败! {response_dict}")
             return
-        myprint(f"领取浇水奖励成功! 获得{response_dict.get('data').get('currentWateringReward').get('rewardNum')}g水滴")
+        myprint(
+            f"领取浇水奖励成功! 获得{response_dict.get('data').get('currentWateringReward').get('rewardNum')}g水滴")
 
     # 领取等级奖励
     def receive_level_reward(self):
@@ -360,13 +376,17 @@ class DeWu:
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             # myprint(response_dict)
-            if response_dict.get('code') != 200 or response_dict.get('data') is None:
+            if response_dict.get('code') != 200 or response_dict.get(
+                    'data') is None:
                 myprint(f"领取等级奖励失败! {response_dict.get('msg')}")
                 return
-            level = response_dict.get('data').get('levelReward').get('showLevel') - 1
-            reward_num = response_dict.get('data').get('currentLevelReward').get('rewardNum')
+            level = response_dict.get('data').get('levelReward').get(
+                'showLevel') - 1
+            reward_num = response_dict.get('data').get(
+                'currentLevelReward').get('rewardNum')
             myprint(f"领取{level}级奖励成功! 获得{reward_num}g水滴")
-            if response_dict.get('data').get('levelReward').get('isComplete') is False:
+            if response_dict.get('data').get('levelReward').get(
+                    'isComplete') is False:
                 return
             time.sleep(1)
 
@@ -415,8 +435,10 @@ class DeWu:
             if response_dict.get('code') != 200:
                 myprint(f"获取种树进度失败! {response_dict}")
                 return
-            count = response_dict.get('data').get('nextWateringTimes')  # 获取浇水奖励还需要的浇水次数
-            if response_dict.get('data').get('wateringReward') is None or count <= 0:  # 没有奖励时退出
+            count = response_dict.get('data').get(
+                'nextWateringTimes')  # 获取浇水奖励还需要的浇水次数
+            if response_dict.get('data').get(
+                    'wateringReward') is None or count <= 0:  # 没有奖励时退出
                 return
             for _ in range(count):
                 if not self.waterting():  # 无法浇水时退出
@@ -450,9 +472,12 @@ class DeWu:
         response_dict = response.json()
         # myprint(response_dict)
         if response_dict.get('code') == 200:
-            self.tasks_completed_number = response_dict.get('data').get('userStep')  # 任务完成数量
-            self.cumulative_tasks_list = response_dict.get('data').get('extraAwardList')  # 累计任务列表
-            self.tasks_dict_list = response_dict.get('data').get('taskList')  # 任务列表
+            self.tasks_completed_number = response_dict.get('data').get(
+                'userStep')  # 任务完成数量
+            self.cumulative_tasks_list = response_dict.get('data').get(
+                'extraAwardList')  # 累计任务列表
+            self.tasks_dict_list = response_dict.get('data').get(
+                'taskList')  # 任务列表
             return True
 
     # 水滴大放送任务步骤1
@@ -462,7 +487,8 @@ class DeWu:
         response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # myprint(response_dict)
-        if response_dict.get('code') == 200 and response_dict.get('status') == 200:
+        if response_dict.get('code') == 200 and response_dict.get(
+                'status') == 200:
             return True
         return False
 
@@ -472,7 +498,8 @@ class DeWu:
         response = self.session.post(url, headers=self.headers, json=_json)
         response_dict = response.json()
         # myprint(response_dict)
-        if response_dict.get('code') == 200 and response_dict.get('status') == 200:
+        if response_dict.get('code') == 200 and response_dict.get(
+                'status') == 200:
             return True
         return False
 
@@ -502,7 +529,8 @@ class DeWu:
             spu_id = int(spu_id) if spu_id else spu_id  # 如果spuId存在 转换为整数类型
 
             if tasks_dict.get('isComplete') is True:  # 可以直接领取奖励的
-                if task_name == '领40g水滴值' and not tasks_dict.get('receivable'):  # 如果该值不存在，说明已经领过40g水滴了
+                if task_name == '领40g水滴值' and not tasks_dict.get(
+                        'receivable'):  # 如果该值不存在，说明已经领过40g水滴了
                     continue
                 myprint(f'开始任务：{task_name}')
                 self.receive_task_reward(classify, task_id, task_type)
@@ -511,9 +539,11 @@ class DeWu:
             myprint(f'★开始任务：{task_name}')
             if task_name == '完成一次签到':  # 签到
                 self.check_in()
-                data = {'taskId': tasks_dict['taskId'], 'taskType': str(tasks_dict['taskType'])}
+                data = {'taskId': tasks_dict['taskId'],
+                        'taskType': str(tasks_dict['taskType'])}
                 if self.submit_task_completion_status(data):
-                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                    self.receive_task_reward(classify, task_id,
+                                             task_type)  # 领取奖励
                     continue
 
             if task_name == '领40g水滴值':  # 每天8点/12点/18点/22点 领40g水滴
@@ -522,7 +552,8 @@ class DeWu:
 
             if task_name == '收集一次水滴生产':
                 if self.judging_bucket_droplet():
-                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                    self.receive_task_reward(classify, task_id,
+                                             task_type)  # 领取奖励
                 else:
                     myprint('当前木桶水滴未达到100g，下次来完成任务吧！')
                 continue
@@ -530,42 +561,52 @@ class DeWu:
             if task_name == '浏览【我】的右上角星愿森林入口':
                 _json = _json = {"action": task_id}
                 url = 'https://app.dewu.com/hacking-tree/v1/user/report_action'
-                response = self.session.post(url, headers=self.headers, json=_json)  # 提交完成状态
+                response = self.session.post(url, headers=self.headers,
+                                             json=_json)  # 提交完成状态
                 response_dict = response.json()
                 # myprint(response_dict)
                 if response_dict.get('code') == 200:
-                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                    self.receive_task_reward(classify, task_id,
+                                             task_type)  # 领取奖励
                 continue
 
-            if any(re.match(pattern, task_name) for pattern in ['参与1次上上签活动', '从桌面组件访问许愿树',
-                                                                '参与1次拆盲盒', '去.*']):
+            if any(re.match(pattern, task_name) for pattern in
+                   ['参与1次上上签活动', '从桌面组件访问许愿树',
+                    '参与1次拆盲盒', '去.*']):
                 _json = _json = {'taskId': task_id, 'taskType': str(task_type)}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
             if any(re.match(pattern, task_name) for pattern in ['.*收藏.*']):
-                _json = _json = {'taskId': task_id, 'taskType': str(task_type), 'btd': btd, 'spuId': spu_id}
+                _json = _json = {'taskId': task_id, 'taskType': str(task_type),
+                                 'btd': btd, 'spuId': spu_id}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
-            if any(re.match(pattern, task_name) for pattern in ['.*订阅.*', '.*逛一逛.*']):
-                _json = _json = {'taskId': task_id, 'taskType': str(task_type), 'btd': btd}
+            if any(re.match(pattern, task_name) for pattern in
+                   ['.*订阅.*', '.*逛一逛.*', '逛逛.*活动']):
+                _json = _json = {'taskId': task_id, 'taskType': str(task_type),
+                                 'btd': btd}
                 self.submit_task_completion_status(_json)  # 提交完成状态
                 self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
                 continue
 
-            if any(re.match(pattern, task_name) for pattern in ['.*逛逛.*', '浏览.*s']):
+            if any(re.match(pattern, task_name) for pattern in
+                   ['.*逛逛.*', '浏览.*s']):
                 _json = {'taskId': task_id, 'taskType': task_type, 'btd': btd}
                 if self.task_commit_pre(_json):
                     myprint(f'等待16秒')
                     time.sleep(16)
-                    _json = {'taskId': task_id, 'taskType': str(task_type), 'activityType': None, 'activityId': None,
-                             'taskSetId': None, 'venueCode': None, 'venueUnitStyle': None, 'taskScene': None,
+                    _json = {'taskId': task_id, 'taskType': str(task_type),
+                             'activityType': None, 'activityId': None,
+                             'taskSetId': None, 'venueCode': None,
+                             'venueUnitStyle': None, 'taskScene': None,
                              'btd': btd}
                     self.submit_task_completion_status(_json)  # 提交完成状态
-                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                    self.receive_task_reward(classify, task_id,
+                                             task_type)  # 领取奖励
                     continue
 
             if any(re.match(pattern, task_name) for pattern in ['.*晒图.*']):
@@ -573,14 +614,18 @@ class DeWu:
                 if self.task_commit_pre(_json):
                     myprint(f'等待16秒')
                     time.sleep(16)
-                    _json = {'taskId': task_id, 'taskType': str(task_type), 'activityType': None, 'activityId': None,
-                             'taskSetId': None, 'venueCode': None, 'venueUnitStyle': None, 'taskScene': None}
+                    _json = {'taskId': task_id, 'taskType': str(task_type),
+                             'activityType': None, 'activityId': None,
+                             'taskSetId': None, 'venueCode': None,
+                             'venueUnitStyle': None, 'taskScene': None}
                     self.submit_task_completion_status(_json)  # 提交完成状态
-                    self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                    self.receive_task_reward(classify, task_id,
+                                             task_type)  # 领取奖励
                     continue
 
             if task_name == '完成五次浇灌':
-                count = tasks_dict.get('total') - tasks_dict.get('curStep')  # 还需要浇水的次数=要浇水的次数-以浇水的次数
+                count = tasks_dict.get('total') - tasks_dict.get(
+                    'curStep')  # 还需要浇水的次数=要浇水的次数-以浇水的次数
                 if self.get_droplet_number() < (count * self.waterting_g):
                     myprint(f'当前水滴不足以完成任务，跳过')
                     continue
@@ -589,12 +634,15 @@ class DeWu:
                     if not self.waterting():  # 无法浇水时退出
                         break
                 else:
-                    _json = {'taskId': tasks_dict['taskId'], 'taskType': str(tasks_dict['taskType'])}
+                    _json = {'taskId': tasks_dict['taskId'],
+                             'taskType': str(tasks_dict['taskType'])}
                     if self.submit_task_completion_status(_json):
-                        self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                        self.receive_task_reward(classify, task_id,
+                                                 task_type)  # 领取奖励
                         continue
 
-            if any(re.match(pattern, task_name) for pattern in ['.*专场', '.*水滴大放送']):
+            if any(re.match(pattern, task_name) for pattern in
+                   ['.*专场', '.*水滴大放送']):
                 if self.task_obtain(task_id, task_type):
                     _json = {'taskId': task_id, 'taskType': 16}
                     if self.task_commit_pre(_json):
@@ -602,7 +650,8 @@ class DeWu:
                         time.sleep(16)
                         _json = {'taskId': task_id, 'taskType': str(task_type)}
                         self.submit_task_completion_status(_json)  # 提交完成状态
-                        self.receive_task_reward(classify, task_id, task_type)  # 领取奖励
+                        self.receive_task_reward(classify, task_id,
+                                                 task_type)  # 领取奖励
                         continue
             myprint(f'该任务暂时无法处理，请提交日志给作者！ {tasks_dict}')
 
@@ -633,11 +682,13 @@ class DeWu:
             response = self.session.post(url, headers=self.headers)
             response_dict = response.json()
             # myprint(response_dict)
-            if response_dict.get('code') == 200 and response_dict.get('status') == 200:
+            if response_dict.get('code') == 200 and response_dict.get(
+                    'status') == 200:
                 myprint('水滴投资成功，水滴-100g')
                 return
             if response_dict.get("msg") == '水滴不够了':
-                myprint(f'水滴投资失败，剩余水滴需超过100g，{response_dict.get("msg")}')
+                myprint(
+                    f'水滴投资失败，剩余水滴需超过100g，{response_dict.get("msg")}')
                 return
             myprint(f'水滴投资出错！ {response_dict}')
             return
@@ -674,20 +725,22 @@ class DeWu:
             return
         url = 'https://app.dewu.com/hacking-tree/v1/user/init'
         if self.index == 0:
-            for share_code in AUTHOR_SHARE_CODE_LIST:
+            for share_code in author_share_code_list:
                 _json = {'keyword': share_code}
-                response = self.session.post(url, headers=self.headers, json=_json)
+                response = self.session.post(url, headers=self.headers,
+                                             json=_json)
                 response_dict = response.json()
                 data = response_dict.get('data')
                 if not data:
                     continue
                 invite_res = data.get('inviteRes')
-                if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
+                if any(re.match(pattern, invite_res) for pattern in
+                       ['助力成功', '助力失败，今日已助力过了']):
                     myprint(f'开始助力 {share_code}', end=' ')
                     myprint(invite_res)
                     return
                 time.sleep(random.randint(20, 30) / 10)
-        for share_code in SHARE_CODE_LIST:
+        for share_code in share_code_list:
             myprint(f'开始助力 {share_code}', end=' ')
             _json = {'keyword': share_code}
             response = self.session.post(url, headers=self.headers, json=_json)
@@ -699,7 +752,8 @@ class DeWu:
                 continue
             invite_res = data.get('inviteRes')
             myprint(invite_res)
-            if any(re.match(pattern, invite_res) for pattern in ['助力成功', '助力失败，今日已助力过了']):
+            if any(re.match(pattern, invite_res) for pattern in
+                   ['助力成功', '助力失败，今日已助力过了']):
                 return
             time.sleep(random.randint(20, 30) / 10)
         return
@@ -720,7 +774,8 @@ class DeWu:
                 invitee_user_id = reward.get('inviteeUserId')
                 url = 'https://app.dewu.com/hacking-tree/v1/invite/reward'
                 _json = {'inviteeUserId': invitee_user_id}
-                response = self.session.post(url, headers=self.headers, json=_json)
+                response = self.session.post(url, headers=self.headers,
+                                             json=_json)
                 response_dict = response.json()
                 if response_dict.get('status') == 200:
                     droplet = response_dict.get('data').get('droplet')
@@ -745,10 +800,12 @@ class DeWu:
             return
         for reward in reward_list:
             # 如果任务完成但是未领取
-            if reward.get('isComplete') is True and reward.get('isReceive') is False:
+            if reward.get('isComplete') is True and reward.get(
+                    'isReceive') is False:
                 url = 'https://app.dewu.com/hacking-tree/v1/team/sign/receive'
                 _json = {"teamTreeId": self.tree_id, "day": reward.get('day')}
-                response = self.session.post(url, headers=self.headers, json=_json)
+                response = self.session.post(url, headers=self.headers,
+                                             json=_json)
                 response_dict = response.json()
                 if response_dict.get('data').get('isOk') is True:
                     myprint(f'获得{reward.get("num")}g水滴')
@@ -773,15 +830,24 @@ class DeWu:
 
     # 点击8个商品获得水滴
     def click_product(self):
-        product_list = [{"spuId": 3030863, "timestamp": 1690790735382, "sign": "2889b16b3077c5719288d105a14ffa1e"},
-                        {"spuId": 4673547, "timestamp": 1690790691956, "sign": "cc3cc95253d29a03fc6e79bfe2200143"},
-                        {"spuId": 1502607, "timestamp": 1690791565022, "sign": "04951eac012785ccb2600703a92c037b"},
-                        {"spuId": 2960612, "timestamp": 1690791593097, "sign": "fb667d45bc3950a7beb6e3fa0fc05089"},
-                        {"spuId": 3143593, "timestamp": 1690791613243, "sign": "82b9fda61be79f7b8833087508d6abe2"},
-                        {"spuId": 3067054, "timestamp": 1690791639606, "sign": "2808f3c7cf2ededea17d3f70a2dc565d"},
-                        {"spuId": 4448037, "timestamp": 1690791663078, "sign": "335bc519ee9183c086beb009adf93738"},
-                        {"spuId": 3237561, "timestamp": 1690791692553, "sign": "5c113b9203a510b7068b3cd0f6b7c25e"},
-                        {"spuId": 3938180, "timestamp": 1690792014889, "sign": "3841c0272443dcbbab0bcb21c94c6262"}, ]
+        product_list = [{"spuId": 3030863, "timestamp": 1690790735382,
+                         "sign": "2889b16b3077c5719288d105a14ffa1e"},
+                        {"spuId": 4673547, "timestamp": 1690790691956,
+                         "sign": "cc3cc95253d29a03fc6e79bfe2200143"},
+                        {"spuId": 1502607, "timestamp": 1690791565022,
+                         "sign": "04951eac012785ccb2600703a92c037b"},
+                        {"spuId": 2960612, "timestamp": 1690791593097,
+                         "sign": "fb667d45bc3950a7beb6e3fa0fc05089"},
+                        {"spuId": 3143593, "timestamp": 1690791613243,
+                         "sign": "82b9fda61be79f7b8833087508d6abe2"},
+                        {"spuId": 3067054, "timestamp": 1690791639606,
+                         "sign": "2808f3c7cf2ededea17d3f70a2dc565d"},
+                        {"spuId": 4448037, "timestamp": 1690791663078,
+                         "sign": "335bc519ee9183c086beb009adf93738"},
+                        {"spuId": 3237561, "timestamp": 1690791692553,
+                         "sign": "5c113b9203a510b7068b3cd0f6b7c25e"},
+                        {"spuId": 3938180, "timestamp": 1690792014889,
+                         "sign": "3841c0272443dcbbab0bcb21c94c6262"}, ]
         for product in product_list:
             url = 'https://app.dewu.com/hacking-tree/v1/product/spu'
             _json = product
@@ -792,7 +858,8 @@ class DeWu:
                 myprint(f'今天已经完成过该任务了！')
                 return
             if response_dict.get('data', {}).get('isReceived') is True:
-                myprint(f'获得{response_dict.get("data").get("dropLetReward")}g水滴')
+                myprint(
+                    f'获得{response_dict.get("data").get("dropLetReward")}g水滴')
                 return
             time.sleep(1)
 
@@ -800,7 +867,8 @@ class DeWu:
     def receive_discover_droplet(self):
         while True:
             url = 'https://app.dewu.com/hacking-tree/v1/product/task/seek-receive'
-            _json = {"sign": "9888433e6d10b514e5b5be4305d123f0", "timestamp": int(time.time() * 1000)}
+            _json = {"sign": "9888433e6d10b514e5b5be4305d123f0",
+                     "timestamp": int(time.time() * 1000)}
             response = self.session.post(url, headers=self.headers, json=_json)
             response_dict = response.json()
             myprint(response_dict)
@@ -842,9 +910,12 @@ class DeWu:
             return
         self.tree_id = response_dict.get('data').get('treeId')
         level = response_dict.get('data').get('level')
-        current_level_need_watering_droplet = response_dict.get('data').get('currentLevelNeedWateringDroplet')
-        user_watering_droplet = response_dict.get('data').get('userWateringDroplet')
-        myprint(f"种树进度: {level}级 {user_watering_droplet}/{current_level_need_watering_droplet}")
+        current_level_need_watering_droplet = response_dict.get('data').get(
+            'currentLevelNeedWateringDroplet')
+        user_watering_droplet = response_dict.get('data').get(
+            'userWateringDroplet')
+        myprint(
+            f"种树进度: {level}级 {user_watering_droplet}/{current_level_need_watering_droplet}")
 
     def main(self):
         character = '★★'
@@ -917,7 +988,7 @@ def main(ck_list):
         myprint('开始获取所有账号助力码')
         for index, ck in enumerate(ck_list):
             myprint(f'第{index + 1}个账号：', end='')
-            SHARE_CODE_LIST.append(DeWu(ck, index).get_share_code())
+            share_code_list.append(DeWu(ck, index).get_share_code())
             time.sleep(0.5)
     for index, ck in enumerate(ck_list):
         myprint(f'*****第{index + 1}个账号*****')
@@ -927,5 +998,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(CK_LIST)
+    main(ck_list)
     sys.exit()
