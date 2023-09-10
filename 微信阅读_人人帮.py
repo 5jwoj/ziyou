@@ -306,8 +306,8 @@ class YueDu6:
             print(f"完成阅读成功，今日已阅读{day_count}篇")
             # time.sleep(3)
 
-    # 搜狐助力
-    def sohu_helps(self):
+    # 搜狐助力 长视频
+    def sohu_helps_long(self):
         headers = self.headers
         for i in range(20):
             url = 'http://ebb.vinse.cn/api/task/v2/getTask'
@@ -321,13 +321,43 @@ class YueDu6:
                 return
             commit_num = response_dict.get('result').get('commitNum')
             print(f"{i + 1}：获取视频成功 已完成{commit_num}次")
-            _time = random.randint(70, 80)
+            _time = random.randint(75, 85)
             print(f'等待{_time}秒')
             time.sleep(_time)
             url = 'http://ebb.vinse.cn/api/task/v2/commitTask'
             _json = {
                 "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
                 "businessType": 5, "taskType": "14", "pageSize": 10}
+            response = requests.post(url, headers=headers, json=_json)
+            response_dict = response.json()
+            if response_dict.get('code') != 0:
+                print(f'观看失败 {response_dict.get("msg")}')
+                return
+            print('观看成功')
+            time.sleep(0.5)
+
+    # 搜狐助力 短视频
+    def sohu_helps_short(self):
+        headers = self.headers
+        for i in range(20):
+            url = 'http://ebb.vinse.cn/api/task/v2/getTask'
+            _json = {
+                "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
+                "businessType": 5, "taskType": "15", "pageSize": 10}
+            response = requests.post(url, headers=headers, json=_json)
+            response_dict = response.json()
+            if response_dict.get('code') != 0:
+                print(response_dict.get("msg"))
+                return
+            commit_num = response_dict.get('result').get('commitNum')
+            print(f"{i + 1}：获取视频成功 已完成{commit_num}次")
+            _time = random.randint(75, 85)
+            print(f'等待{_time}秒')
+            time.sleep(_time)
+            url = 'http://ebb.vinse.cn/api/task/v2/commitTask'
+            _json = {
+                "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
+                "businessType": 5, "taskType": "15", "pageSize": 10}
             response = requests.post(url, headers=headers, json=_json)
             response_dict = response.json()
             if response_dict.get('code') != 0:
@@ -370,8 +400,10 @@ class YueDu6:
         for _ in range(2):
             self.read_article()  # 阅读文章
             time.sleep(5)
-        print(f'{character}开始执行搜狐助力（收益次日结算）')
-        self.sohu_helps()
+        print(f'{character}开始执行搜狐助力长视频（收益次日结算）')
+        self.sohu_helps_long()
+        print(f'{character}开始执行搜狐助力短视频（收益次日结算）')
+        self.sohu_helps_short()
         print(f'{character}开始提现')
         self.withdraw()  # 提现
 
