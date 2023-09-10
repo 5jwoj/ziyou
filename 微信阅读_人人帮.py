@@ -14,7 +14,7 @@
 # 也可以使用 pushplus http://www.pushplus.plus/ 发送过检测通知 填写pushplus的token
 # 选填 export push_token='****'
 # 一天运行一两次
-# 青龙拉库 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%AE%E4%BF%A1%E9%98%85%E8%AF%BB_%E4%BA%BA%E4%BA%BA%E5%B8%AE.py
+# 青龙拉库 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/微信阅读_人人帮.py
 # https://t.me/q7q7q7q7q7q7q7_ziyou
 
 import sys
@@ -26,12 +26,12 @@ import re
 import os
 from retrying import retry
 
-CK_LIST = []
+ck_list = []
 PUSH_TOKEN = ''
 
 ck_list_str = os.getenv("renrenbang_ck")
 if ck_list_str:
-    CK_LIST += ck_list_str.replace("&", "\n").split("\n")
+    ck_list += ck_list_str.replace("&", "\n").split("\n")
 
 push_token_list_str = os.getenv("push_token")
 if push_token_list_str:
@@ -39,7 +39,8 @@ if push_token_list_str:
 
 
 # 请求文章地址
-@retry(stop_max_attempt_number=3, wait_random_min=3000, wait_random_max=5000)  # 重试3次，重试等待时间3s到5s随机
+@retry(stop_max_attempt_number=3, wait_random_min=3000,
+       wait_random_max=5000)  # 重试3次，重试等待时间3s到5s随机
 def parsing_web_pages(url):
     # print('开始解析网页')
     try:
@@ -59,7 +60,8 @@ def get_name(url):
         pattern = r'nickname.*?>([^<>]+?)</strong>'
         name_1_list = re.findall(pattern, response_text)
         name_2_list = re.findall('name = "(.*?)"', response_text)
-        wechat_name_list = re.findall('<span class="profile_meta_value">(.*?)</span>', response_text)
+        wechat_name_list = re.findall(
+            '<span class="profile_meta_value">(.*?)</span>', response_text)
         if not wechat_name_list:
             wechat_name_list = ['未获取到']
         if name_1_list:
@@ -84,7 +86,8 @@ def generate_worktile_id():
         cookies = {'sid': sid_value}
         requests.get('https://request.worktile.com/create', cookies=cookies)
 
-        response = requests.get('https://request.worktile.com/api/requests/', cookies=cookies)
+        response = requests.get('https://request.worktile.com/api/requests/',
+                                cookies=cookies)
         # print(response.json())
         response_dict = response.json()
         if data := response_dict.get('data')[0]:
@@ -99,7 +102,8 @@ def send_pushplus(push_token, article_url, worktile_id):
              "content": f'<a href="{article_url}">点击验证跳转</a>\n\n'
                         f'<a href="https://request.worktile.com/{worktile_id}">点击完成验证跳转</a>',
              "template": "html"}
-    response = requests.post("http://www.pushplus.plus/send", headers=headers, json=_json)
+    response = requests.post("http://www.pushplus.plus/send", headers=headers,
+                             json=_json)
     response_dict = response.json()
     # print(response_dict)
     if response_dict.get('code') == 200:
@@ -118,7 +122,8 @@ def waiting_verification(push_token, article_url):
     print(f'请在{_time}秒内微信打开文章链接过验证')
     print(f'等待{_time}秒')
     for i in range(_time):
-        response = requests.get(f"https://request.worktile.com/api/requests/{_id}/inspects")
+        response = requests.get(
+            f"https://request.worktile.com/api/requests/{_id}/inspects")
         response_dict = response.json()
         if response_dict.get('data').get('inspects'):
             return True
@@ -152,7 +157,8 @@ class YueDu6:
         # print(response_dict)
         if response_dict.get('code') == 0:
             nick_name = response_dict.get('result').get('nickName')
-            integral_current = response_dict.get('result').get('integralCurrent')
+            integral_current = response_dict.get('result').get(
+                'integralCurrent')
             print(f'{nick_name} 帮豆：{integral_current}')
             return True
         return False
@@ -174,7 +180,8 @@ class YueDu6:
         response_dict = response.json()
         # print(response_dict)
         if response_dict.get('code') == 0:
-            print(f'签到成功，获得{response_dict.get("result").get("point")}帮豆')
+            print(
+                f'签到成功，获得{response_dict.get("result").get("point")}帮豆')
             return
         print(f'签到失败 {response_dict}')
 
@@ -195,13 +202,16 @@ class YueDu6:
         if not task_url:
             return
         nested_list = self.detection_list
-        detection_list = [item for sublist in nested_list for item in sublist]  # 解包检测文章的 订阅号名称，微信id，biz
+        detection_list = [item for sublist in nested_list for item in
+                          sublist]  # 解包检测文章的 订阅号名称，微信id，biz
         t = re.findall(r'mr(.*?)\.', task_url)[0]
         host = re.findall(r'//(.*/?)/', task_url)[0]
-        headers = {'Host': 'u.cocozx.cn', 'Connection': 'keep-alive', 'Content-Length': '93',
+        headers = {'Host': 'u.cocozx.cn', 'Connection': 'keep-alive',
+                   'Content-Length': '93',
                    'Accept': 'application/json, text/javascript, */*; q=0.01',
                    'User-Agent': 'Mozilla/5.0 (Linux; Android 13; 22041211AC Build/TP1A.220624.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/111.0.5563.116 Mobile Safari/537.36 XWEB/5235 MMWEBSDK/20230701 MMWEBID/544 MicroMessenger/8.0.40.2420(0x28002851) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64',
-                   'Content-Type': 'application/json; charset=UTF-8', 'Origin': f'http://{host}',
+                   'Content-Type': 'application/json; charset=UTF-8',
+                   'Origin': f'http://{host}',
                    'X-Requested-With': 'com.tencent.mm',
                    # 'Accept-Encoding': 'gzip, deflate',
                    'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7'}
@@ -214,10 +224,12 @@ class YueDu6:
         repeat_request_signal = 0  # 用来标记 连续两次 请求失败，说明可能黑号了
         for i in range(60):
             url = 'http://u.cocozx.cn/ipa/read/read'
-            _json = {"fr": "ebb0726", "uid": self.uid, "group": str(group), "un": None, "token": None, "pageSize": 20}
+            _json = {"fr": "ebb0726", "uid": self.uid, "group": str(group),
+                     "un": None, "token": None, "pageSize": 20}
             response = requests.post(url, headers=headers, json=_json)
             response_dict = response.json()
-            if response_dict.get('code') != 0 or response_dict.get('result') is None:
+            if response_dict.get('code') != 0 or response_dict.get(
+                    'result') is None:
                 print(f"{i + 1}：获取文章失败 {response_dict}")
                 return
             # print(response_dict)
@@ -260,7 +272,8 @@ class YueDu6:
             mid_list = re.findall('mid=(.+?)&', article_url)
             mid = mid_list[0] if mid_list else None
             name, wechat_name = get_name(article_url)
-            print(f'订阅号名称：{name} 微信号：{wechat_name} mid：{mid} biz：{__biz}')
+            print(
+                f'订阅号名称：{name} 微信号：{wechat_name} mid：{mid} biz：{__biz}')
             if __biz in detection_list or name in detection_list or wechat_name in detection_list:
                 print('该文章为检测文章')
 
@@ -272,7 +285,8 @@ class YueDu6:
                     print('微信点击验证成功')
                 else:
                     _time = 60
-                    print(f'请在{_time}秒内微信打开文章链接过验证 {article_url}')
+                    print(
+                        f'请在{_time}秒内微信打开文章链接过验证 {article_url}')
                     print(f'等待{_time}秒')
                     time.sleep(_time)
 
@@ -280,7 +294,8 @@ class YueDu6:
             print(f'等待{_time}秒')
             time.sleep(_time)
             url = f"http://u.cocozx.cn/ipa/read/submit"
-            _json = {"fr": "ebb0726", "uid": self.uid, "group": str(group), "un": None, "token": None, "pageSize": 20}
+            _json = {"fr": "ebb0726", "uid": self.uid, "group": str(group),
+                     "un": None, "token": None, "pageSize": 20}
             response = requests.post(url, headers=headers, json=_json)
             response_dict = response.json()
             # print(response_dict)
@@ -291,15 +306,47 @@ class YueDu6:
             print(f"完成阅读成功，今日已阅读{day_count}篇")
             # time.sleep(3)
 
+    # 搜狐助力
+    def sohu_helps(self):
+        headers = self.headers
+        for i in range(20):
+            url = 'http://ebb.vinse.cn/api/task/v2/getTask'
+            _json = {
+                "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
+                "businessType": 5, "taskType": "14", "pageSize": 10}
+            response = requests.post(url, headers=headers, json=_json)
+            response_dict = response.json()
+            if response_dict.get('code') != 0:
+                print(response_dict.get("msg"))
+                return
+            commit_num = response_dict.get('result').get('commitNum')
+            print(f"{i + 1}：获取视频成功 已完成{commit_num}次")
+            _time = random.randint(70, 80)
+            print(f'等待{_time}秒')
+            time.sleep(_time)
+            url = 'http://ebb.vinse.cn/api/task/v2/commitTask'
+            _json = {
+                "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
+                "businessType": 5, "taskType": "14", "pageSize": 10}
+            response = requests.post(url, headers=headers, json=_json)
+            response_dict = response.json()
+            if response_dict.get('code') != 0:
+                print(f'观看失败 {response_dict.get("msg")}')
+                return
+            print('观看成功')
+            time.sleep(0.5)
+
     # 提现
     def withdraw(self):
         response_dict = self.requests_infomation()
-        integral_current = response_dict.get('result', {}).get('integralCurrent')
+        integral_current = response_dict.get('result', {}).get(
+            'integralCurrent')
         print(f'当前金币：{integral_current}')
         if integral_current < 5000:
             print(f'金币少于5000不可提现')
             return
-        withdraw_dict = {100000: "100000", 50000: "50000", 10000: "10000", 5000: "5000"}
+        withdraw_dict = {100000: "100000", 50000: "50000", 10000: "10000",
+                         5000: "5000"}
         money = 0
         for key, value in withdraw_dict.items():
             if integral_current >= key:
@@ -323,11 +370,13 @@ class YueDu6:
         for _ in range(2):
             self.read_article()  # 阅读文章
             time.sleep(5)
+        print(f'{character}开始执行搜狐助力（收益次日结算）')
+        self.sohu_helps()
         print(f'{character}开始提现')
         self.withdraw()  # 提现
 
 
-def main(ck_list):
+def main():
     if not ck_list:
         print('没有获取到账号！')
         return
@@ -339,5 +388,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(CK_LIST)
+    main()
     sys.exit()
