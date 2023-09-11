@@ -332,7 +332,7 @@ class YueDu6:
                     break
                 commit_num = response_dict.get('result').get('commitNum')
                 print(f"{i + 1}：获取视频成功 已完成{commit_num}次")
-                _time = random.randint(75, 85)
+                _time = random.randint(90, 100)
                 print(f'等待{_time}秒')
                 time.sleep(_time)
                 url = 'http://ebb.vinse.cn/api/task/v2/commitTask'
