@@ -33,12 +33,12 @@ HELP_SIGNAL = 'True'
 SK = ''
 USER_AGENT = ''
 __version__ = '1.0.2'
-PRINT_ALL_STR = ""  # 用于记录所有 myprint 输出的字符串
+all_print_list = []  # 用于记录所有 myprint 输出的字符串
 
 
 # 用于记录所有 print 输出的字符串,暂时实现 print 函数的sep和end
 def myprint(*args, sep=' ', end='\n', **kwargs):
-    global PRINT_ALL_STR
+    global all_print_list
     output = ""
     # 构建输出字符串
     for index, arg in enumerate(args):
@@ -47,7 +47,7 @@ def myprint(*args, sep=' ', end='\n', **kwargs):
             continue
         output += str(arg) + sep
     output = output + end
-    PRINT_ALL_STR += output
+    all_print_list.append(output)
     # 调用内置的 print 函数打印字符串
     print(*args, sep=sep, end=end, **kwargs)
 
@@ -57,7 +57,7 @@ def send_notification_message(title):
     try:
         from notify import send  # 导入青龙通知文件
 
-        send(title, PRINT_ALL_STR)
+        send(title, ''.join(all_print_list))
     except Exception as e:
         if e:
             print('发送通知消息失败！')
@@ -94,7 +94,7 @@ def get_version_from_github():
     ]
     for url in url_list:
         try:
-            response = requests.get(url, timeout=(3, 3))
+            response = requests.get(url, timeout=(10, 10))
             if response.status_code == 200:
                 response_text = response.text
                 version_regex = r"^__version__\s*=\s*[\'\"]([^\'\"]*)[\'\"]"
@@ -966,7 +966,7 @@ class DeWu:
 
 
 # 主程序
-def main(ck_list):
+def main():
     get_version_from_github()
     get_env()
     if not ck_list:
@@ -998,5 +998,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(ck_list)
+    main()
     sys.exit()
