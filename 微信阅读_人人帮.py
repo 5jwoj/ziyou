@@ -382,8 +382,8 @@ class YueDu6:
         for _ in range(2):
             self.read_article()  # 阅读文章
             time.sleep(5)
-        print(f'{character}开始执行搜狐助力（收益次日结算）')
-        self.sohu_helps()
+        # print(f'{character}开始执行搜狐助力（收益次日结算）')
+        # self.sohu_helps()
         print(f'{character}开始提现')
         self.withdraw()  # 提现
 
