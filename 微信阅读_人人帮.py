@@ -220,7 +220,10 @@ class YueDu6:
         response = requests.post(url, headers=headers, json=_json)
         response_dict = response.json()
         _str = response_dict.get('result', {}).get('str')
-        group = re.findall(r'group=(.*?)$', _str)[0]
+        group_list = re.findall(r'group=(.*?)$', _str)
+        group = ''
+        if group_list:
+            group = group_list[0]
         repeat_request_signal = 0  # 用来标记 连续两次 请求失败，说明可能黑号了
         for i in range(60):
             url = 'http://u.cocozx.cn/ipa/read/read'
