@@ -21,11 +21,11 @@ import time
 
 import requests
 
-CK_LIST = []
+ck_list = []
 
 ck_list_str = os.getenv("xiaibang_ck")
 if ck_list_str:
-    CK_LIST += ck_list_str.replace("&", "\n").split("\n")
+    ck_list += ck_list_str.replace("&", "\n").split("\n")
 
 
 class XiAiBang:
@@ -153,7 +153,7 @@ class XiAiBang:
         for task_id in ['152', '133']:
             headers = self.headers
             params = {'_random': str(time.time() * 1000), }
-            data = 'taskId=152&isCurrent=1'
+            data = f'taskId={task_id}&isCurrent=1'
             response = requests.post('https://m.xiaicn.com/user/active/period_task/reward', params=params,
                                      cookies=self.cookies, headers=headers, data=data)
             response_dict = response.json()
@@ -205,7 +205,7 @@ class XiAiBang:
         self.get_infomation()  # 获取用户信息
 
 
-def main(ck_list):
+def main():
     if not ck_list:
         print('没有获取到账号！')
         return
@@ -217,5 +217,5 @@ def main(ck_list):
 
 
 if __name__ == '__main__':
-    main(CK_LIST)
+    main()
     sys.exit()
