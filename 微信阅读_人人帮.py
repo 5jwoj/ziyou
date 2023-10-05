@@ -3,7 +3,7 @@
 # @Time    : 2023/8/24 21:34
 # @Author  : ziyou
 # -------------------------------
-# 微信打开 阅读地址 http://ebb.vindacanzhi.cloud/user/index.html?mid=1694702701386006528
+# 微信打开 阅读地址 http://ebb1696517247287.usepadding.cloud/user/index.html?mid=1694715345354489856
 # cron "15 10-12 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('微信阅读_人人帮')
 # 抓包 http://ebb.vinse.cn/api 类似网址下的  un#uid#token
