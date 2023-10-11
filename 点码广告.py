@@ -8,6 +8,9 @@
 # cron "1 8,22 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('点码广告')
 # 抓包首次进入微信小程序时 unionId 的值，或者下载点码广告app 抓微信登录时 unionId 的值
+# https://wxsq.itaoniu.com.cn/TN_WANGCAI/api/v2/yxapp/account/auth
+# https://wxsq.itaoniu.com.cn/TN_WANGCAI/api/v2/yxapp/account/loginWx
+# 以上两个链接都含有 unionId 的值 oaZnks**********-******
 # 点码广告
 # export dianmaguanggao_token='oaZnk********&oaZnk*******',多账号使用换行或&
 # https://t.me/q7q7q7q7q7q7q7_ziyou
