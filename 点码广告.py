@@ -3,7 +3,7 @@
 # @Time    : 2023/10/10 12:42
 # @Author  : ziyou
 # -------------------------------
-# 注册下载地址 https://p.sda1.dev/13/651894af94ce5b6ce533b244d99d71c8/photo_2023-10-11_09-04-39.jpg
+# 注册下载地址 https://p.sda1.dev/13/dfe74947656cfa3e972dbc6bfe06a878/photo_2023-10-12_08-54-17.jpg
 # 每日一快左右
 # cron "1 8,22 * * *" script-path=xxx.py,tag=匹配cron用
 # const $ = new Env('点码广告')
@@ -327,6 +327,8 @@ class DianMaGuangGao:
         if balance <= 1:
             print(f'[账号{index + 1}] 当前余额为：{income_balance}，不进行提现')
             return
+        if balance > 150:
+            balance = 150
         _json = {
             'money': str(balance / 10),
         }
