@@ -32,7 +32,7 @@ share_code_list = []
 author_share_code_list = []
 HELP_SIGNAL = 'True'
 sk_list = []
-USER_AGENT = 'Mozilla/5.0 (Linux; U; Android 10; zh-cn; M2007J3SC Build/QKQ1.200419.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/71.0.3578.141 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.3.14 Mobile Safari/537.36/duapp/5.24.5(android;13)'
+USER_AGENT = ''
 __version__ = '1.0.3'
 all_print_list = []  # 用于记录所有 myprint 输出的字符串
 
