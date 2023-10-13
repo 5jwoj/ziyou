@@ -8,7 +8,7 @@
 # 抓包 https://app.dewu.com/hacking-tree/v1/user/init 获取 sk x_auth_token user_agent
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
-# export dewu_sk='9MFyPaKgdQl*********&9MFyPaKgdQl*********' 多账号使用换行或& 一个账号对应一个sk，相同的sk不用账号使用会出验证码，同一设备sk相同，建议一个设备登一个账号抓包
+# export dewu_sk='9MFyPaKgdQl*********&9MFyPaKgdQl*********' 多账号使用换行或& 一个账号对应一个sk，顺序需与dewu_x_auth_token相同，相同的sk不用账号使用会出验证码，同一设备sk相同，建议一个设备登一个账号抓包
 # export dewu_user_agent='*****pp/5.25.0******' 同一 sk 对应的 user_agent，其中需含有得物版本号 版本号需大于 5.24.5
 # user_agent示例： Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429 Mobile Safari/537.36/duapp/5.24.5(android;13)
 # user_agent示例： DUApp/5.25.0 (com.siwuai.duapp; build:5.25.0.120; iOS 15.6.0) Alamofire/5.3.0
