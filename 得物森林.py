@@ -78,7 +78,7 @@ def get_env():
         HELP_SIGNAL = env_str
     env_str = os.getenv("dewu_sk")
     if env_str:
-        sk_list = env_str.strip()
+        sk_list = env_str.replace("&", "\n").split("\n")
     env_str = os.getenv("dewu_user_agent")
     if env_str:
         USER_AGENT = env_str.strip()
