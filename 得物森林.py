@@ -8,7 +8,7 @@
 # 抓包 https://app.dewu.com/hacking-tree/v1/user/init 获取 sk x_auth_token user_agent
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
-# export dewu_sk='9MFyPaKgdQl*******************' 任意一个账号的 sk
+# export dewu_sk='9MFyPaKgdQl*********&9MFyPaKgdQl*********' 多账号使用换行或& 一个账号对应一个sk，相同的sk不用账号使用会出验证码，同一设备sk相同，建议一个设备登一个账号抓包
 # export dewu_user_agent='*****pp/5.25.0******' 同一 sk 对应的 user_agent，其中需含有得物版本号 版本号需大于 5.24.5
 # user_agent示例： Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429 Mobile Safari/537.36/duapp/5.24.5(android;13)
 # user_agent示例： DUApp/5.25.0 (com.siwuai.duapp; build:5.25.0.120; iOS 15.6.0) Alamofire/5.3.0
@@ -23,16 +23,17 @@ import random
 import re
 import sys
 import time
-import requests
 from urllib.parse import urlparse, parse_qs
+
+import requests
 
 ck_list = []
 share_code_list = []
 author_share_code_list = []
 HELP_SIGNAL = 'True'
-SK = ''
-USER_AGENT = ''
-__version__ = '1.0.2'
+sk_list = []
+USER_AGENT = 'Mozilla/5.0 (Linux; U; Android 10; zh-cn; M2007J3SC Build/QKQ1.200419.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/71.0.3578.141 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.3.14 Mobile Safari/537.36/duapp/5.24.5(android;13)'
+__version__ = '1.0.3'
 all_print_list = []  # 用于记录所有 myprint 输出的字符串
 
 
@@ -67,7 +68,7 @@ def send_notification_message(title):
 def get_env():
     global ck_list
     global HELP_SIGNAL
-    global SK
+    global sk_list
     global USER_AGENT
     env_str = os.getenv("dewu_x_auth_token")
     if env_str:
@@ -77,7 +78,7 @@ def get_env():
         HELP_SIGNAL = env_str
     env_str = os.getenv("dewu_sk")
     if env_str:
-        SK = env_str.strip()
+        sk_list = env_str.strip()
     env_str = os.getenv("dewu_user_agent")
     if env_str:
         USER_AGENT = env_str.strip()
@@ -144,11 +145,12 @@ class DeWu:
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
         app_version = re.findall(r'pp/([0-9]+\.[0-9]+\.[0-9]+)', USER_AGENT)[0]
+        sk = sk_list[index]
         self.headers = {'appVersion': app_version,
                         'User-Agent': USER_AGENT,
                         'x-auth-token': x_auth_token,
                         'uuid': '0000000000000000',
-                        'SK': SK, }
+                        'SK': sk, }
         self.tree_id = 0  # 树的id
         self.tasks_completed_number = 0  # 任务完成数
         self.cumulative_tasks_list = []  # 累计计任务列表
@@ -967,12 +969,17 @@ class DeWu:
 
 # 主程序
 def main():
+    global ck_list
+    global sk_list
+
     get_version_from_github()
     get_env()
+    ck_list = [x for x in ck_list if x.strip() != ""]
+    sk_list = [x for x in sk_list if x.strip() != ""]
     if not ck_list:
         myprint('没有获取到账号！')
         return
-    if not SK:
+    if not sk_list:
         myprint('dewu_sk 未填写！')
         return
     if not USER_AGENT:
@@ -982,8 +989,14 @@ def main():
     if not _list:
         myprint('dewu_user_agent 中无法匹配到得物app版本号，重新抓个试试吧')
         return
+    ck_count = len(ck_list)
+    sk_count = len(sk_list)
+    if ck_count != sk_count:
+        print(
+            f'dewu_x_auth_token({ck_count}个)与dewu_sk({sk_count}个)数量不相等')
+        return
+    myprint(f'获取到{ck_count}个账号！')
     download_author_share_code()
-    myprint(f'获取到{len(ck_list)}个账号！')
     if HELP_SIGNAL == 'True':
         myprint('开始获取所有账号助力码')
         for index, ck in enumerate(ck_list):
