@@ -9,11 +9,11 @@
 # 得物森林
 # export dewu_x_auth_token='Bearer ey**&Bearer ey**',多账号使用换行或&
 # export dewu_sk='9MFyPaKgdQl*********&9MFyPaKgdQl*********' 多账号使用换行或& 一个账号对应一个sk，顺序需与dewu_x_auth_token相同，相同的sk不同账号使用会出验证码，同一设备sk相同，建议一个设备登一个账号抓包
-# export dewu_user_agent='*****pp/5.25.0******' 同一 sk 对应的 user_agent，其中需含有得物版本号 版本号需大于 5.24.5
+# export dewu_user_agent='*****pp/5.25.0******&*****pp/5.25.0******' 多账号使用换行或&  同一 sk 对应的 user_agent，其中需含有得物版本号 版本号推荐不小于 5.24.5
 # user_agent示例： Mozilla/5.0 (Linux; U; Android 10; zh-cn; Mi 10 Pro Build/QKQ1.191117.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/77.0.3865.120 MQQBrowser/11.0 Mobile Safari/537.36 COVC/045429 Mobile Safari/537.36/duapp/5.24.5(android;13)
 # user_agent示例： DUApp/5.25.0 (com.siwuai.duapp; build:5.25.0.120; iOS 15.6.0) Alamofire/5.3.0
 # 如需关闭助力功能设置 export dewu_help_signal='False'
-# 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/%E5%BE%97%E7%89%A9%E6%A3%AE%E6%9E%97.py
+# 青龙拉取命令 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/得物森林.py
 # 第一个账号助力作者，其余账号依ck顺序助力
 # https://t.me/q7q7q7q7q7q7q7_ziyou
 
@@ -32,8 +32,8 @@ share_code_list = []
 author_share_code_list = []
 HELP_SIGNAL = 'True'
 sk_list = []
-USER_AGENT = ''
-__version__ = '1.0.3'
+user_agent_list = []
+__version__ = '1.0.4'
 all_print_list = []  # 用于记录所有 myprint 输出的字符串
 
 
@@ -69,7 +69,7 @@ def get_env():
     global ck_list
     global HELP_SIGNAL
     global sk_list
-    global USER_AGENT
+    global user_agent_list
     env_str = os.getenv("dewu_x_auth_token")
     if env_str:
         ck_list += env_str.replace("&", "\n").split("\n")
@@ -81,7 +81,7 @@ def get_env():
         sk_list = env_str.replace("&", "\n").split("\n")
     env_str = os.getenv("dewu_user_agent")
     if env_str:
-        USER_AGENT = env_str.strip()
+        user_agent_list = env_str.replace("&", "\n").split("\n")
 
 
 def get_version_from_github():
@@ -144,10 +144,12 @@ class DeWu:
         self.waterting_g = waterting_g  # 每次浇水克数
         self.remaining_g = remaining_g  # 最后浇水剩余不超过的克数
         self.session = requests.Session()
-        app_version = re.findall(r'pp/([0-9]+\.[0-9]+\.[0-9]+)', USER_AGENT)[0]
+        pattern = r'pp/([0-9]+\.[0-9]+\.[0-9]+)'
+        user_agent = user_agent_list[index]
+        app_version = re.findall(pattern, user_agent)[0]
         sk = sk_list[index]
         self.headers = {'appVersion': app_version,
-                        'User-Agent': USER_AGENT,
+                        'User-Agent': user_agent,
                         'x-auth-token': x_auth_token,
                         'uuid': '0000000000000000',
                         'SK': sk, }
@@ -971,26 +973,29 @@ class DeWu:
 def main():
     global ck_list
     global sk_list
+    global user_agent_list
 
     get_version_from_github()
     get_env()
     ck_list = [x for x in ck_list if x.strip() != ""]
     sk_list = [x for x in sk_list if x.strip() != ""]
+    user_agent_list = [x for x in user_agent_list if x.strip() != ""]
     if not ck_list:
         myprint('没有获取到账号！')
         return
     if not sk_list:
         myprint('dewu_sk 未填写！')
         return
-    if not USER_AGENT:
+    if not user_agent_list:
         myprint('dewu_user_agent 未填写！')
-        return
-    _list = re.findall(r'pp/([0-9]+\.[0-9]+\.[0-9]+)', USER_AGENT)
-    if not _list:
-        myprint('dewu_user_agent 中无法匹配到得物app版本号，重新抓个试试吧')
         return
     ck_count = len(ck_list)
     sk_count = len(sk_list)
+    user_agent_count = len(user_agent_list)
+    if ck_count != sk_count:
+        print(
+            f'dewu_x_auth_token({ck_count}个)与dewu_user_agent({user_agent_count}个)数量不相等')
+        return
     if ck_count != sk_count:
         print(
             f'dewu_x_auth_token({ck_count}个)与dewu_sk({sk_count}个)数量不相等')
@@ -1007,6 +1012,7 @@ def main():
         myprint(f'*****第{index + 1}个账号*****')
         DeWu(ck, index).main()
         myprint('')
+        time.sleep(5)
     send_notification_message(title='得物森林')  # 发送通知消息
 
 
