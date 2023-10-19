@@ -89,6 +89,50 @@ class ZhongFen:
                 continue
             print(f'[账号{index + 1}] 视频观看失败 {response_dict}')
 
+    # 提现
+    def withdraw(self):
+        headers = self.headers
+        index = self.index
+        ck = self.ck
+
+        url = 'http://lses-lcae.ihuju.cn/index.php/Home/My/withdrawal.html'
+        response = requests.get(url, headers=headers)
+        response_text = response.text
+        # print(response_text)
+        pattern = r'class="jui_fc_red">(.*?)</a>'
+        jui_fc_red = re.findall(pattern, response_text)[0]
+        # print(jui_fc_red)
+        pattern = r'<span id="money_num">(\d*\.\d*)</span>元'
+        money_num = float(re.findall(pattern, response_text)[0])
+        if '请前往设置您的支付宝账号' in jui_fc_red:
+            print(
+                f'[账号{index + 1}] 当前余额：{money_num}元 未设置提现的支付宝账号')
+            return
+        # print(money_num)
+        if money_num < 10:
+            print(
+                f'[账号{index + 1}] 当前余额：{money_num}元 未达到最低提现金额')
+            return
+        data = {
+            'price': f'{money_num}',
+        }
+        url = 'http://lses-lcae.ihuju.cn/index.php/Home/My/withdrawal.html'
+        headers = {
+            'Host': 'lses-lcae.ihuju.cn',
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With': 'XMLHttpRequest',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; 22041211AC Build/TP1A.220624.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/115.0.5790.166 Mobile Safari/537.36  XiaoMi/MiuiBrowser/10.8.1 LT-APP/45/158/YM-RT/',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Origin': 'http://lses-lcae.ihuju.cn',
+            'Referer': 'http://lses-lcae.ihuju.cn/index.php/Home/My/withdrawal.html',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Cookie': f'token={ck}',
+        }
+        response = requests.post(url, headers=headers, data=data, )
+        response_dict = response.json()
+        info = response_dict.get('info')
+        print(f'[账号{index + 1}] 提现{money_num}元 提现结果：{info}')
+
 
 def threading_task(func):
     # 创建线程池并设置最大线程数
@@ -114,8 +158,8 @@ def threading_main():
     print("============开始观看10个视频广告签到============")
     threading_task('sign_in')
     print('')
-    print("============开始获取用户信息============")
-    threading_task('get_infomation')
+    print("============开始提现============")
+    threading_task('withdraw')
     print('')
 
 
