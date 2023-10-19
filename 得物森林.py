@@ -956,8 +956,8 @@ class DeWu:
         self.click_product()
         myprint(f'{character}开始领取品牌特惠奖励')
         self.receive_brand_specials()
-        # myprint(f'{character}开始进行助力')
-        # self.help_user()
+        myprint(f'{character}开始进行助力')
+        self.help_user()
         myprint(f'{character}开始领取助力奖励')
         self.receive_help_reward()
         myprint(f'{character}开始领取等级奖励')
@@ -1002,12 +1002,12 @@ def main():
         return
     myprint(f'获取到{ck_count}个账号！')
     download_author_share_code()
-    # if HELP_SIGNAL == 'True':
-    #     myprint('开始获取所有账号助力码')
-    #     for index, ck in enumerate(ck_list):
-    #         myprint(f'第{index + 1}个账号：', end='')
-    #         share_code_list.append(DeWu(ck, index).get_share_code())
-    #         time.sleep(0.5)
+    if HELP_SIGNAL == 'True':
+        myprint('开始获取所有账号助力码')
+        for index, ck in enumerate(ck_list):
+            myprint(f'第{index + 1}个账号：', end='')
+            share_code_list.append(DeWu(ck, index).get_share_code())
+            time.sleep(0.5)
     for index, ck in enumerate(ck_list):
         myprint(f'*****第{index + 1}个账号*****')
         DeWu(ck, index).main()
