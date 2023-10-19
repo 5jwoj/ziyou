@@ -161,6 +161,7 @@ class YueDu6:
                 'integralCurrent')
             print(f'{nick_name} 帮豆：{integral_current}')
             return True
+        print(f'获取信息失败 {response_dict}')
         return False
 
     # 签到
