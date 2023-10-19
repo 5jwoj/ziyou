@@ -17,13 +17,13 @@
 # 青龙拉库 ql raw https://raw.githubusercontent.com/q7q7q7q7q7q7q7/ziyou/main/微信阅读_人人帮.py
 # https://t.me/q7q7q7q7q7q7q7_ziyou
 
+import os
+import random
+import re
 import sys
 import time
-import random
-import requests
-import re
 
-import os
+import requests
 from retrying import retry
 
 ck_list = []
@@ -199,6 +199,7 @@ class YueDu6:
     # 阅读文章
     def read_article(self):
         task_url = self.get_read_url()
+        article_index = 0
         if not task_url:
             return
         nested_list = self.detection_list
@@ -270,6 +271,7 @@ class YueDu6:
             if not article_url:
                 return
             print(f"{i + 1}：获取文章成功 {article_url}")
+            repeat_request_signal = 0  # 获取成功信号值归零
             __biz_list = re.findall('__biz=(.+?)&', article_url)
             __biz = __biz_list[0] if __biz_list else None
             mid_list = re.findall('mid=(.+?)&', article_url)
@@ -277,7 +279,8 @@ class YueDu6:
             name, wechat_name = get_name(article_url)
             print(
                 f'订阅号名称：{name} 微信号：{wechat_name} mid：{mid} biz：{__biz}')
-            if __biz in detection_list or name in detection_list or wechat_name in detection_list:
+            if __biz in detection_list or name in detection_list or wechat_name in detection_list or article_index in [
+                0, 5, 15, 25]:
                 print('该文章为检测文章')
 
                 if PUSH_TOKEN:
@@ -305,7 +308,8 @@ class YueDu6:
             if response_dict.get('code') != 0:
                 print(f'完成阅读失败 {response_dict}')
                 return
-            day_count = response_dict.get('result').get('dayCount')
+            article_index = day_count = response_dict.get('result').get(
+                'dayCount')
             print(f"完成阅读成功，今日已阅读{day_count}篇")
             # time.sleep(3)
 
